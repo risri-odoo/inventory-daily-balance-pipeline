@@ -1,0 +1,3 @@
+source_file,status,rows_read,rows_accepted,rows_rejected,rows_duplicate,rows_late,rows_superseding
+batch_01.csv,SUCCESS,17,8,8,1,0,0
+batch_02.csv,SUCCESS,14,10,4,0,4,2

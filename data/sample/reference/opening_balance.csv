@@ -1,0 +1,4 @@
+sku,location_id,as_of_date,quantity
+SKU-001,WH-01,2026-02-28,100
+SKU-001,ST-01,2026-02-28,20
+SKU-002,WH-01,2026-02-28,50

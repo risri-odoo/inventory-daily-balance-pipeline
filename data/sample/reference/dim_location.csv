@@ -1,0 +1,4 @@
+location_id,location_name,location_type
+WH-01,Central Warehouse,WAREHOUSE
+ST-01,Store North,STORE
+ST-02,Store South,STORE

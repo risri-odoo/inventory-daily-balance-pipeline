@@ -1,0 +1,2 @@
+batch_note,quantity,business_date,sku,movement_type,location_id,event_ts,movement_id
+late truck,7,2026-03-04,SKU-001,RECEIPT,WH-01,2026-03-04T08:00:00Z,MV-3003

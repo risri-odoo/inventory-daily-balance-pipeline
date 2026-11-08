@@ -232,9 +232,19 @@ def test_business_date_equal_to_event_date_passes() -> None:
     assert primary(business_date="2026-02-10", event_ts="2026-02-10T00:00:00Z") is None
 
 
-def test_future_dated_uses_utc_date_of_event() -> None:
-    # 2026-02-11 01:00 at +05:00 is 2026-02-10 20:00 UTC, so business_date 2026-02-11 is in the future.
-    assert primary(business_date="2026-02-11", event_ts="2026-02-11T01:00:00+05:00") == v.FUTURE_DATED
+def test_future_dated_uses_local_date_ahead_of_utc() -> None:
+    # 2026-02-04 01:00 at +05:30 is 2026-02-03 19:30 UTC, but the local date is 2026-02-04,
+    # so business_date 2026-02-04 is NOT in the future.
+    result = v.validate_row(make_fields(business_date="2026-02-04", event_ts="2026-02-04T01:00:00+05:30"), REFERENCE)
+    assert result.is_valid
+    assert result.movement is not None
+    assert result.movement.event_ts == "2026-02-03T19:30:00Z"   # still stored in UTC
+
+
+def test_future_dated_uses_local_date_behind_utc() -> None:
+    # 2026-02-10 22:00 at -05:00 is 2026-02-11 03:00 UTC, but the local date is 2026-02-10,
+    # so business_date 2026-02-11 IS in the future.
+    assert primary(business_date="2026-02-11", event_ts="2026-02-10T22:00:00-05:00") == v.FUTURE_DATED
 
 
 # --- BEFORE_OPENING_SNAPSHOT -----------------------------------------------------

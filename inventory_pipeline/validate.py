@@ -150,7 +150,8 @@ def parse_business_date(text: str) -> Optional[str]:
 def parse_event_ts(text: str) -> Optional[datetime]:
     """An ISO-8601 date-time. 'Z' or an offset is honoured; no timezone means UTC.
 
-    Returns an aware datetime in UTC.
+    Returns an aware datetime that KEEPS the offset written in the source, so its .date()
+    is the local calendar date (used by the future-dated rule). Use format_utc() to store it.
     """
     if not TIMESTAMP_PATTERN.match(text):
         return None
@@ -161,11 +162,15 @@ def parse_event_ts(text: str) -> Optional[datetime]:
         return None
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
+    return parsed
 
 
 def format_utc(value: datetime) -> str:
-    """Format a UTC datetime as 'YYYY-MM-DDTHH:MM:SSZ' (fractional seconds kept if present)."""
+    """Convert an aware datetime to UTC and format it as 'YYYY-MM-DDTHH:MM:SSZ'.
+
+    Fractional seconds are kept only if present.
+    """
+    value = value.astimezone(timezone.utc)
     if value.microsecond:
         return value.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
     return value.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -283,10 +288,12 @@ def validate_row(fields: dict[str, str], reference: ReferenceData) -> Validation
         errors.append(RejectError(INVALID_TRANSFER, f"to_location_id must be blank for {movement_type}"))
 
     # FUTURE_DATED: the business date cannot be after the day the source recorded the event.
+    # We compare with the calendar date as written in event_ts (its local date, before any
+    # conversion to UTC): 2026-02-04T01:00:00+05:30 is 4 February where it was recorded.
     if business_date is not None and event_ts is not None:
-        event_date = event_ts.date().isoformat()
-        if business_date > event_date:
-            errors.append(RejectError(FUTURE_DATED, f"business_date {business_date} is after event_ts date {event_date}"))
+        event_local_date = event_ts.date().isoformat()
+        if business_date > event_local_date:
+            errors.append(RejectError(FUTURE_DATED, f"business_date {business_date} is after event_ts local date {event_local_date}"))
 
     # BEFORE_OPENING_SNAPSHOT: the period up to as_of_date is closed, for both legs of a transfer.
     if business_date is not None and sku != "":

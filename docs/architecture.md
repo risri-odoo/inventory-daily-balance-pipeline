@@ -37,7 +37,12 @@ flowchart TD
     Q --> REC
     PR --> REC
     REC --> RPT[report<br/>reconciliation_report.md/.json<br/>+ CSV exports]
+    REC --> DASH[dashboard<br/>output/dashboard.html<br/>read-only, offline]
+    DIB --> DASH
 ```
+
+The dashboard (`dashboard.py`) is a read-only view for walkthroughs. It reads the same tables and runs the
+same checks as `report`, and writes nothing to the database.
 
 ## Module responsibilities
 
@@ -56,6 +61,7 @@ All modules live in `inventory_pipeline/`. Each one does one job and can be read
 | `pipeline.py` | Orchestration of one run: RUNNING → SKIPPED / REJECTED / transaction → SUCCESS / FAILED | `run_file`, `run_input`, `run_load_reference` |
 | `reconcile.py` | Independent SQL checks over the finished tables | `run_reconciliation`, `check_*` |
 | `report.py` | Reconciliation report (Markdown + JSON) and CSV exports | `write_report` |
+| `dashboard.py` | Read-only, offline, single-file HTML dashboard: static sections rendered and escaped in Python, interactive sections drawn by vanilla JS from safely embedded JSON | `write_dashboard`, `collect_data`, `safe_json` |
 | `logs.py` | `key=value` log lines to console and `output/logs/pipeline.log` | `setup_logging`, `log_event` |
 | `generator.py` | Seeded synthetic data with oracle labels | `generate` |
 | `cli.py` | `python -m inventory_pipeline <command>` | `main` |
@@ -72,6 +78,7 @@ flowchart LR
     pipeline --> balances
     cli --> reconcile
     cli --> report --> reconcile
+    cli --> dashboard --> reconcile
     cli --> generator --> validate
     pipeline --> db --> schema
     load --> ingest

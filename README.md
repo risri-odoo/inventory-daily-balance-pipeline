@@ -18,7 +18,7 @@ python -m venv .venv
 pip install -r requirements.txt
 
 python -m inventory_pipeline demo     # fresh DB -> sample reference -> 2 sample batches -> reconcile -> report
-pytest -q                             # 171 tests
+pytest -q                             # 179 tests
 ```
 
 > **If `python -m venv` cannot install pip** (e.g. Debian/Ubuntu without `python3-venv`): install it
@@ -40,7 +40,30 @@ pytest -q                             # 171 tests
 All 11 other checks are PASS. The one WARN is deliberate: the sample contains a pair (SKU-003 @ WH-01)
 that is issued stock it never received. Results go to `output/`: `demo.db`,
 `reconciliation_report.md/.json`, `daily_inventory_balance.csv`, `quarantine_movement.csv`,
-`pipeline_run.csv` and `logs/pipeline.log`.
+`pipeline_run.csv`, `dashboard.html` and `logs/pipeline.log`.
+
+## Dashboard (read-only, offline)
+
+`demo` also writes **`output/dashboard.html`**, a single self-contained file (inline CSS and JavaScript, data
+embedded, no external URLs, no server). Open it by double-clicking it, or from the terminal:
+
+```bash
+# Windows:  start output\dashboard.html      macOS:  open output/dashboard.html      Linux:  xdg-open output/dashboard.html
+python -m inventory_pipeline dashboard --db output/demo.db --out output/dashboard.html   # rebuild it for any database
+```
+
+It shows:
+- the overall reconciliation status, headline counts and horizon;
+- one card per check, with example rows;
+- the run log in the order runs started;
+- rejects by reason, plus a filterable quarantine table;
+- a **balance explorer**: pick a SKU and location to see a closing-quantity chart and the daily table, with
+  negative days highlighted;
+- **movement history**: type a `movement_id` to see every version, which one is current, and the arrival
+  order. Try `MV-1005`: v3 arrived before v2.
+
+The dashboard only reads the database. It is meant for review-sized databases: every row is embedded, so for
+the 100k benchmark database the file is about 14 MB.
 
 ## Architecture
 
@@ -75,8 +98,9 @@ env vars `INV_DB_PATH` / `INV_OUTPUT_DIR` (defaults: `output/inventory.db` and `
 | `run --input FILE_OR_DIR [--force] [--full-rebuild] [--fail-at after_load\|after_rebuild]` | Process one file or every `*.csv` in a folder (filename order) |
 | `reconcile` | Run the 12 checks and log PASS / FAIL / WARN |
 | `report [--out DIR]` | Reconcile, then write `reconciliation_report.md/.json` and CSV exports |
+| `dashboard [--out FILE]` | Write the read-only, offline HTML dashboard (default `<output-dir>/dashboard.html`) |
 | `generate [--rows 100000] [--seed 42] [--out data/generated] ...` | Synthetic data + oracle labels (see `--help` for SKUs, locations, days, batches, defect rates) |
-| `demo [--output-dir DIR]` | Recreate `<output-dir>/demo.db`, load the sample, reconcile, report |
+| `demo [--output-dir DIR]` | Recreate `<output-dir>/demo.db`, load the sample, reconcile, report, write the dashboard |
 
 Exit code: **1** if any run is FAILED or REJECTED, or any check FAILS; otherwise 0 (a WARN is 0).
 
@@ -146,7 +170,7 @@ Column-level detail: [docs/data_dictionary.md](docs/data_dictionary.md). Example
 
 ## How it was tested
 
-- **171 pytest tests:**
+- **179 pytest tests:**
   - one per validation rule and boundary;
   - end to end on a hand-made sample whose expected balances, rejects and run counts were worked out by hand;
   - idempotency (skip, `--force`, incremental = full rebuild);

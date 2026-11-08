@@ -23,7 +23,8 @@ Every commit carries a `Co-Authored-By: Claude` trailer.
 | Build spec | `prompt_history/00_initial_prompt.md` | Candidate (with the TODO planning tool) | The initial prompt that defined requirements, rules, phases and acceptance checks |
 | Assignment text | `docs/assignment.md` | Candidate (pasted the original brief) | |
 | Pipeline package | `inventory_pipeline/*.py` (14 modules) | Claude Code | Written phase by phase from the spec |
-| Tests | `tests/*.py` (171 tests) | Claude Code | |
+| Tests | `tests/*.py` (179 tests) | Claude Code | |
+| Dashboard (Phase 8, optional) | `inventory_pipeline/dashboard.py`, `tests/test_dashboard.py` | Claude Code | Built from the candidate's Phase 8 spec. The page's JavaScript was checked by running it against a minimal fake DOM in Node (a throwaway script, not committed); it was not opened in a real browser by the assistant |
 | Sample data and answer key | `data/sample/**` incl. `expected/README.md` | Claude Code | The expected balances were worked out by the assistant by hand (in its reasoning), not from pipeline output; the pipeline then matched them |
 | Generator and benchmark | `inventory_pipeline/generator.py`, `scripts/benchmark.py` | Claude Code | Benchmark numbers come from real runs on the candidate's laptop |
 | SQL examples | `sql/sample_queries.sql` | Claude Code | |
@@ -50,6 +51,11 @@ Every commit carries a `Co-Authored-By: Claude` trailer.
   followed within minutes, and later pushes were gated on pytest's own exit code.
 - **Mutation checks:** in Phase 3, two key lines were deliberately broken in a scratch copy, to confirm the
   tests catch them (they did).
+- **Dashboard escaping test gap (Phase 8):** a mutation check showed that removing `html.escape` from the
+  dashboard did not fail any test, because the hostile test data only reached the embedded JSON. A test that
+  puts a hostile value into a server-rendered section (the run log's `error_message`) was added. Both escaping
+  mutations (HTML and JSON) now fail the intended tests. The template filling was also changed to a single
+  pass, so data containing a placeholder name like `__DATA__` cannot be replaced.
 
 ## Where AI accelerated the work (facts from the build; candidate to confirm or edit)
 

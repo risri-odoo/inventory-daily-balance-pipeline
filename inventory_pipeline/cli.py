@@ -1,6 +1,6 @@
 """Command-line interface: `python -m inventory_pipeline <command>`.
 
-Commands: init, load-reference, run, reconcile, report, generate, demo.
+Commands: init, load-reference, run, reconcile, report, dashboard, generate, demo.
 The exit code is non-zero when a run is FAILED or REJECTED, or a reconciliation check FAILS.
 """
 
@@ -10,12 +10,13 @@ import sqlite3
 from pathlib import Path
 from typing import Optional, Sequence
 
-from inventory_pipeline import config, db, generator, pipeline, reconcile, report
+from inventory_pipeline import config, dashboard, db, generator, pipeline, reconcile, report
 from inventory_pipeline.logs import close_logging, log_event, setup_logging
 
 # data/sample next to the package, so `demo` works from any current directory.
 DEFAULT_SAMPLE_DIR = Path(__file__).resolve().parent.parent / "data" / "sample"
 DEMO_DB_FILENAME = "demo.db"
+DASHBOARD_FILENAME = "dashboard.html"
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -54,6 +55,9 @@ def build_parser() -> argparse.ArgumentParser:
                      help="Raise an error inside the transaction on purpose (to test rollback and retry)")
 
     subparsers.add_parser("reconcile", parents=[common], help="Run the reconciliation checks (exit 1 if any FAIL)")
+
+    dash = subparsers.add_parser("dashboard", parents=[common], help="Write a read-only, offline HTML dashboard")
+    dash.add_argument("--out", type=Path, default=None, help="HTML file to write (default: <output-dir>/dashboard.html)")
 
     report_parser = subparsers.add_parser("report", parents=[common], help="Write the reconciliation report and CSV exports")
     report_parser.add_argument("--out", type=Path, default=None, help="Folder for the report files (default: the output dir)")
@@ -193,6 +197,18 @@ def cmd_report(args: argparse.Namespace) -> int:
     return 0 if result.passed else 1
 
 
+def cmd_dashboard(args: argparse.Namespace) -> int:
+    """Write the read-only HTML dashboard for the configured database."""
+    out_path = args.out or resolve_output_dir(args) / DASHBOARD_FILENAME
+    conn = open_database(args)
+    try:
+        path = dashboard.write_dashboard(conn, out_path)
+    finally:
+        conn.close()
+    print(f"event=dashboard_written status=SUCCESS path={display_path(path)}")
+    return 0
+
+
 def cmd_demo(args: argparse.Namespace) -> int:
     """Run the whole pipeline on the sample data in a fresh database."""
     output_dir = resolve_output_dir(args)
@@ -214,6 +230,7 @@ def cmd_demo(args: argparse.Namespace) -> int:
             result = reconcile.run_reconciliation(conn)
             log_reconciliation(logger, result)
             paths = report.write_report(conn, result, output_dir)
+            paths.append(dashboard.write_dashboard(conn, output_dir / DASHBOARD_FILENAME))
             for path in paths:
                 log_event(logger, "report_written", path=display_path(path))
         finally:
@@ -261,6 +278,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return cmd_report(args)
     if args.command == "generate":
         return cmd_generate(args)
+    if args.command == "dashboard":
+        return cmd_dashboard(args)
     if args.command == "demo":
         return cmd_demo(args)
     raise ValueError(f"unknown command: {args.command}")

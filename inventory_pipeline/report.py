@@ -102,7 +102,7 @@ def write_report(conn: sqlite3.Connection, report: ReconciliationReport, out_dir
     rejects = reject_summary(conn)
 
     md_path = out_dir / "reconciliation_report.md"
-    md_path.write_text(render_markdown(report, runs, rejects), encoding="utf-8")
+    md_path.write_text(render_markdown(report, runs, rejects), encoding="utf-8", newline="\n")
 
     json_path = out_dir / "reconciliation_report.json"
     payload = {
@@ -113,7 +113,7 @@ def write_report(conn: sqlite3.Connection, report: ReconciliationReport, out_dir
         "rejects_by_reason": rejects,
         "runs": runs,
     }
-    json_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    json_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n")
 
     written = [md_path, json_path]
     for file_name, sql in EXPORTS.items():

@@ -1,6 +1,7 @@
 """SQLite schema: every table and view the pipeline uses.
 
-All statements use IF NOT EXISTS, so running `init` twice is safe.
+Tables and indexes use IF NOT EXISTS and views are dropped and recreated, so running
+`init` twice is safe and never touches data.
 
 Conventions:
 - dates are TEXT 'YYYY-MM-DD'; timestamps are TEXT UTC 'YYYY-MM-DDTHH:MM:SSZ'
@@ -72,28 +73,36 @@ CREATE TABLE IF NOT EXISTS movement_event (
 MOVEMENT_EVENT_INDEXES = """
 CREATE INDEX IF NOT EXISTS ix_movement_event_run ON movement_event (run_id);
 CREATE INDEX IF NOT EXISTS ix_movement_event_date ON movement_event (business_date);
+-- Let the incremental rebuild read only the affected (sku, location) pairs, for both
+-- the source leg (location_id) and the destination leg of a transfer (to_location_id).
+CREATE INDEX IF NOT EXISTS ix_movement_event_pair ON movement_event (sku, location_id);
+CREATE INDEX IF NOT EXISTS ix_movement_event_to_pair ON movement_event (sku, to_location_id);
 """
 
 # The current state of a movement is its highest version ever received,
-# regardless of the order in which versions arrived.
+# regardless of the order in which versions arrived: a row is current when no row
+# with the same movement_id has a higher version. Each check is one primary-key lookup,
+# and SQLite can push a filter on sku/location into the view (used by the incremental rebuild).
+# Views hold no data, so they are dropped and recreated on every init to stay up to date.
 V_MOVEMENT_CURRENT = """
-CREATE VIEW IF NOT EXISTS v_movement_current AS
+DROP VIEW IF EXISTS v_movement_current;
+CREATE VIEW v_movement_current AS
 SELECT e.*
 FROM movement_event AS e
-JOIN (
-    SELECT movement_id, MAX(version) AS max_version
-    FROM movement_event
-    GROUP BY movement_id
-) AS latest
-  ON latest.movement_id = e.movement_id
- AND latest.max_version = e.version;
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM movement_event AS newer
+    WHERE newer.movement_id = e.movement_id
+      AND newer.version > e.version
+);
 """
 
 # Signed ledger legs built from the current versions only.
 # A TRANSFER becomes two legs: TRANSFER_OUT (-qty at location_id)
 # and TRANSFER_IN (+qty at to_location_id).
 V_MOVEMENT_LEG = """
-CREATE VIEW IF NOT EXISTS v_movement_leg AS
+DROP VIEW IF EXISTS v_movement_leg;
+CREATE VIEW v_movement_leg AS
 SELECT
     movement_id,
     version,

@@ -97,16 +97,35 @@ def date_range(start: str, end: str) -> Iterator[str]:
 # ---------------------------------------------------------------------------
 
 
-def fetch_leg_totals(conn: sqlite3.Connection) -> dict[Pair, dict[str, DayTotals]]:
-    """Sum the current ledger legs per pair, day and leg type, in one query."""
+def fetch_leg_totals(conn: sqlite3.Connection, pairs: Optional[set[Pair]] = None) -> dict[Pair, dict[str, DayTotals]]:
+    """Sum the current ledger legs per pair, day and leg type, in one query.
+
+    With `pairs`, only those pairs are read: they are put in a temporary table and the
+    query filters on it, which SQLite pushes into the view so it can use the pair indexes.
+    """
     totals: dict[Pair, dict[str, DayTotals]] = {}
-    rows = conn.execute(
-        """
-        SELECT sku, location_id, business_date, leg_type, SUM(qty_delta) AS qty
-        FROM v_movement_leg
-        GROUP BY sku, location_id, business_date, leg_type
-        """
-    )
+    if pairs is None:
+        rows = conn.execute(
+            """
+            SELECT sku, location_id, business_date, leg_type, SUM(qty_delta) AS qty
+            FROM v_movement_leg
+            GROUP BY sku, location_id, business_date, leg_type
+            """
+        )
+    else:
+        if not pairs:
+            return totals
+        conn.execute("CREATE TEMP TABLE IF NOT EXISTS wanted_pair (sku TEXT, location_id TEXT, PRIMARY KEY (sku, location_id))")
+        conn.execute("DELETE FROM wanted_pair")
+        conn.executemany("INSERT INTO wanted_pair (sku, location_id) VALUES (?, ?)", sorted(pairs))
+        rows = conn.execute(
+            """
+            SELECT sku, location_id, business_date, leg_type, SUM(qty_delta) AS qty
+            FROM v_movement_leg
+            WHERE (sku, location_id) IN (SELECT sku, location_id FROM wanted_pair)
+            GROUP BY sku, location_id, business_date, leg_type
+            """
+        )
     for sku, location_id, business_date, leg_type, qty in rows:
         day_totals = totals.setdefault((sku, location_id), {})
         day_totals.setdefault(business_date, DayTotals()).add_leg(leg_type, qty)
@@ -243,15 +262,31 @@ def full_rebuild(conn: sqlite3.Connection, run_id: str) -> RebuildStats:
     return stats
 
 
+def extend_pair(conn: sqlite3.Connection, pair: Pair, last_date: str, horizon: str, run_id: str) -> int:
+    """Carry an unaffected pair's last closing balance forward from last_date + 1 to the horizon.
+
+    The pair has no movements after last_date (any new movement would have made it affected),
+    so the new days have no movements and the ledger does not need to be read.
+    """
+    sku, location_id = pair
+    closing = conn.execute(
+        "SELECT closing_qty FROM daily_inventory_balance WHERE sku = ? AND location_id = ? AND balance_date = ?",
+        (sku, location_id, last_date),
+    ).fetchone()[0]
+    rows = build_pair_rows(pair, shift_day(last_date, 1), horizon, closing, {}, run_id)
+    conn.executemany(INSERT_BALANCE_SQL, rows)
+    return len(rows)
+
+
 def incremental_rebuild(conn: sqlite3.Connection, affected: dict[Pair, str], run_id: str) -> RebuildStats:
-    """Rebuild only what changed.
+    """Rebuild only what changed, reading the ledger only for the pairs being rebuilt.
 
     1. Each affected pair: from its earliest affected date to the horizon.
-    2. Every other pair whose rows stop before the horizon: extend it (carry the balance forward).
-    3. Every other pair with no rows yet (e.g. opening balance only): build it from its start.
+    2. Each pair with an opening balance but no rows yet: build it from its start.
+       (A pair with movements always has rows, because it was affected when they loaded.)
+    3. Every other pair whose rows stop before the horizon: extend it (carry the balance forward).
     """
     openings = fetch_openings(conn)
-    leg_totals = fetch_leg_totals(conn)
     horizon = fetch_horizon(conn)
     last_dates: dict[Pair, str] = {
         (sku, location_id): last_date
@@ -259,11 +294,13 @@ def incremental_rebuild(conn: sqlite3.Connection, affected: dict[Pair, str], run
             "SELECT sku, location_id, MAX(balance_date) FROM daily_inventory_balance GROUP BY sku, location_id"
         )
     }
+    new_opening_pairs = sorted(p for p in openings if p not in last_dates and p not in affected)
+    leg_totals = fetch_leg_totals(conn, set(affected) | set(new_opening_pairs))
 
     stats = RebuildStats()
 
-    def rebuild(pair: Pair, from_date: Optional[str]) -> None:
-        stats.rows_written += rebuild_pair(conn, pair, from_date, horizon, openings, leg_totals, run_id)
+    def count(pair: Pair, rows_written: int) -> None:
+        stats.rows_written += rows_written
         stats.pairs_rebuilt += 1
         stats.rebuilt_pairs.append(pair)
 
@@ -272,16 +309,14 @@ def incremental_rebuild(conn: sqlite3.Connection, affected: dict[Pair, str], run
         # If the pair's rows stop before the affected date, start right after its last row.
         if pair in last_dates:
             from_date = min(from_date, shift_day(last_dates[pair], 1))
-        rebuild(pair, from_date)
+        count(pair, rebuild_pair(conn, pair, from_date, horizon, openings, leg_totals, run_id))
 
     if horizon is not None:
-        for pair in sorted(set(openings) | set(leg_totals)):
-            if pair in affected:
-                continue
-            if pair not in last_dates:
-                rebuild(pair, None)
-            elif last_dates[pair] < horizon:
-                rebuild(pair, shift_day(last_dates[pair], 1))
+        for pair in new_opening_pairs:
+            count(pair, rebuild_pair(conn, pair, None, horizon, openings, leg_totals, run_id))
+        for pair in sorted(last_dates):
+            if pair not in affected and last_dates[pair] < horizon:
+                count(pair, extend_pair(conn, pair, last_dates[pair], horizon, run_id))
     return stats
 
 

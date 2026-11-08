@@ -161,7 +161,7 @@ Column-level detail: [docs/data_dictionary.md](docs/data_dictionary.md). Example
 | [docs/architecture.md](docs/architecture.md) | Flow diagram, module responsibilities |
 | [docs/data_dictionary.md](docs/data_dictionary.md) | Every source column, table, key, null rule and derived field |
 | [docs/design_notes.md](docs/design_notes.md) | Decisions and trade-offs (SQLite, dense grid, versions, incremental, negative stock, idempotency) |
-| [docs/assumptions_and_deviations.md](docs/assumptions_and_deviations.md) | Every assumption (A1–A32) and deviation |
+| [docs/assumptions_and_deviations.md](docs/assumptions_and_deviations.md) | Every assumption (A1–A35) and deviation |
 | [docs/verification.md](docs/verification.md) | Each acceptance criterion mapped to the tests and checks that prove it |
 | [docs/benchmark.md](docs/benchmark.md) | 100k-row timings, the optimization measured, next steps |
 | [docs/walkthrough.md](docs/walkthrough.md) | A record traced end to end, likely reviewer questions |

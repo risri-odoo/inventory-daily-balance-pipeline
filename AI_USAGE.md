@@ -68,7 +68,7 @@ Every commit carries a `Co-Authored-By: Claude` trailer.
 
 - All code was written by the assistant. The candidate's input was the specification (the initial prompt),
   the A10 rule change, and approving each phase with "continue".
-- The design choices not fixed by the spec (assumptions A1–A32) were made by the assistant and recorded
+- The design choices not fixed by the spec (assumptions A1–A35) were made by the assistant and recorded
   for review.
 
 ## TODO (candidate): what I personally reviewed

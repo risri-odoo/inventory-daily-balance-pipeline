@@ -1,0 +1,228 @@
+{
+  "generated_at": "2026-11-08T10:58:08Z",
+  "overall_status": "WARN",
+  "checks": [
+    {
+      "name": "run_counts",
+      "description": "Per run: rows_read = accepted + rejected + duplicate, matching movement_event and quarantine_movement counts for that run_id.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "3 runs checked; rows read by successful runs = 31; rows in tables = 31",
+      "examples": []
+    },
+    {
+      "name": "independent_recompute",
+      "description": "Opening balance + SQL window cumulative sum of leg deltas equals closing_qty on every movement date.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "13 (pair, movement date) points compared",
+      "examples": []
+    },
+    {
+      "name": "continuity",
+      "description": "Opening = previous day's closing with no date gaps; first opening = opening balance (or 0).",
+      "status": "PASS",
+      "failures": 0,
+      "details": "",
+      "examples": []
+    },
+    {
+      "name": "row_arithmetic",
+      "description": "closing = opening + net_change, and net_change = receipt - issue + transfer_in - transfer_out + adjustment, on every row.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "21 balance rows checked",
+      "examples": []
+    },
+    {
+      "name": "component_totals",
+      "description": "Receipt, issue, transfer-in, transfer-out and adjustment totals in daily_inventory_balance equal the ledger.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "ledger totals: receipt=63, issue=44, transfer_in=40, transfer_out=40, adjustment=0",
+      "examples": []
+    },
+    {
+      "name": "transfer_balance",
+      "description": "Total transfer_in_qty equals total transfer_out_qty.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "transfer_in=40, transfer_out=40",
+      "examples": []
+    },
+    {
+      "name": "pair_coverage",
+      "description": "Every pair runs from its start date (as_of_date + 1, or first movement) to the global horizon; no unexpected pairs.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "7 pairs; global horizon 2026-03-04",
+      "examples": []
+    },
+    {
+      "name": "current_version_unique",
+      "description": "Exactly one current version per movement_id.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "15 distinct movements",
+      "examples": []
+    },
+    {
+      "name": "referential_integrity",
+      "description": "No orphan sku or location values in movement_event, daily_inventory_balance or opening_balance.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "",
+      "examples": []
+    },
+    {
+      "name": "quarantine_traceability",
+      "description": "Every quarantine row has source_file, source_line, raw_record and a reject_reason.",
+      "status": "PASS",
+      "failures": 0,
+      "details": "13 quarantine rows checked",
+      "examples": []
+    },
+    {
+      "name": "closed_period_legs",
+      "description": "No accepted leg is dated on or before its pair's opening as_of_date (can only happen if an opening balance changed after loading).",
+      "status": "PASS",
+      "failures": 0,
+      "details": "",
+      "examples": []
+    },
+    {
+      "name": "negative_balances",
+      "description": "Closing balances below zero (data-quality warning: stock issued that was never received).",
+      "status": "WARN",
+      "failures": 2,
+      "details": "2 negative rows across 1 pairs",
+      "examples": [
+        {
+          "sku": "SKU-003",
+          "location_id": "WH-01",
+          "balance_date": "2026-03-03",
+          "closing_qty": -7
+        },
+        {
+          "sku": "SKU-003",
+          "location_id": "WH-01",
+          "balance_date": "2026-03-04",
+          "closing_qty": -7
+        }
+      ]
+    }
+  ],
+  "table_counts": {
+    "dim_sku": 3,
+    "dim_location": 3,
+    "opening_balance": 3,
+    "movement_event": 18,
+    "quarantine_movement": 13,
+    "daily_inventory_balance": 21,
+    "pipeline_run": 3,
+    "processed_file": 2
+  },
+  "rejects_by_reason": [
+    {
+      "reject_reason": "BEFORE_OPENING_SNAPSHOT",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "CONFLICTING_DUPLICATE",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "DUPLICATE_EVENT",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "FUTURE_DATED",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "INVALID_DATE",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "INVALID_MOVEMENT_TYPE",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "INVALID_QUANTITY",
+      "row_count": 2
+    },
+    {
+      "reject_reason": "INVALID_TRANSFER",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "MALFORMED_ROW",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "MISSING_REQUIRED_FIELD",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "UNKNOWN_LOCATION",
+      "row_count": 1
+    },
+    {
+      "reject_reason": "UNKNOWN_SKU",
+      "row_count": 1
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "run-20261108T105808Z-399f5453",
+      "source_file": "reference",
+      "status": "SUCCESS",
+      "rows_read": 0,
+      "rows_accepted": 0,
+      "rows_rejected": 0,
+      "rows_duplicate": 0,
+      "rows_late": 0,
+      "rows_superseding": 0,
+      "min_affected_date": null,
+      "pairs_rebuilt": 3,
+      "balance_rows_written": 0,
+      "negative_balance_rows": 0,
+      "duration_ms": 44,
+      "error_message": null
+    },
+    {
+      "run_id": "run-20261108T105808Z-2145111d",
+      "source_file": "batch_01.csv",
+      "status": "SUCCESS",
+      "rows_read": 17,
+      "rows_accepted": 8,
+      "rows_rejected": 8,
+      "rows_duplicate": 1,
+      "rows_late": 0,
+      "rows_superseding": 0,
+      "min_affected_date": "2026-03-01",
+      "pairs_rebuilt": 4,
+      "balance_rows_written": 7,
+      "negative_balance_rows": 0,
+      "duration_ms": 18,
+      "error_message": null
+    },
+    {
+      "run_id": "run-20261108T105808Z-1092996f",
+      "source_file": "batch_02.csv",
+      "status": "SUCCESS",
+      "rows_read": 14,
+      "rows_accepted": 10,
+      "rows_rejected": 4,
+      "rows_duplicate": 0,
+      "rows_late": 4,
+      "rows_superseding": 2,
+      "min_affected_date": "2026-03-01",
+      "pairs_rebuilt": 7,
+      "balance_rows_written": 18,
+      "negative_balance_rows": 2,
+      "duration_ms": 18,
+      "error_message": null
+    }
+  ]
+}

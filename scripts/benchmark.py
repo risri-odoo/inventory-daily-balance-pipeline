@@ -99,7 +99,7 @@ def write_late_batch(path: Path, conn: sqlite3.Connection, rows: int, business_d
     for i in range(rows):
         sku, location = pairs[(i * step) % len(pairs)]
         lines.append(f"MV-LATE-{i + 1:05d},1,RECEIPT,{sku},{location},,5,{business_date},{business_date}T12:00:00Z,LATE,BENCH")
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def time_late_batch(base_db: Path, late_file: Path, work_dir: Path, full_rebuild: bool, repeats: int) -> dict[str, object]:
@@ -214,18 +214,50 @@ def render_markdown(r: dict) -> str:
         f"The incremental rebuild stage was **{speedup_rebuild:.1f}x faster** ({speedup_total:.1f}x for the whole run) "
         f"and both modes produced identical balance tables: **{r['incremental_equals_full']}**.",
         "",
-        "Why: a full rebuild deletes and rewrites every row of every pair. The incremental rebuild only rewrites "
-        "the affected pairs from their earliest affected date to the horizon (plus extending other pairs if the "
-        "horizon moves), keeping all earlier days. Both still read the ledger with one aggregate query over "
-        "`v_movement_leg`, so that part of the cost is the same in both modes.",
+        "Why: a full rebuild reads the whole current ledger and deletes and rewrites every row of every pair. "
+        "The incremental rebuild reads the ledger only for the affected pairs, rewrites them from their earliest "
+        "affected date to the horizon, keeps all earlier days, and extends other pairs (if the horizon moves) by "
+        "carrying their last closing forward.",
         "",
+    ]
+    base = r.get("baseline")
+    if base:
+        b_load, b_inc, b_full = base["load"], base["incremental"], base["full"]
+        lines += [
+            "### Before vs. after narrowing the incremental read",
+            "",
+            f"The first benchmark run ({base['finished_at']}, raw results in "
+            "[evidence/benchmark_baseline.json](evidence/benchmark_baseline.json)) showed the incremental "
+            "rebuild was barely faster than a full rebuild: both read the **whole** current ledger through "
+            "`v_movement_leg`, and that read was most of the cost. Two changes followed:",
+            "",
+            "1. `v_movement_current` was rewritten from a `GROUP BY` join to `NOT EXISTS (a higher version)`: "
+            "one primary-key lookup per row, and SQLite can push filters into the view.",
+            "2. The incremental rebuild reads legs only for the affected pairs (a temporary table plus two new "
+            "indexes on `(sku, location_id)` and `(sku, to_location_id)`). Unaffected pairs are extended by "
+            "carrying their last closing forward, without reading the ledger.",
+            "",
+            "Same data, same seed, same machine:",
+            "",
+            "| measure | before | after |",
+            "|---|---:|---:|",
+            f"| load of all batches, s | {b_load['seconds']:.2f} | {load['seconds']:.2f} |",
+            f"| rows/s | {b_load['rows_per_second']:,.0f} | {load['rows_per_second']:,.0f} |",
+            f"| rebuild stage summed over batches, ms | {b_load['stage_totals_ms']['rebuild']:,} | {stage['rebuild']:,} |",
+            f"| late batch, incremental rebuild stage (median), ms | {b_inc['rebuild_ms_median']:,} | {inc['rebuild_ms_median']:,} |",
+            f"| late batch, full rebuild stage (median), ms | {b_full['rebuild_ms_median']:,} | {full['rebuild_ms_median']:,} |",
+            f"| incremental speed-up over full rebuild | {b_full['rebuild_ms_median'] / max(b_inc['rebuild_ms_median'], 1):.1f}x | {speedup_rebuild:.1f}x |",
+            "",
+        ]
+    lines += [
         "## Where the time goes and next steps",
         "",
         "- **Validate + load** is row-by-row Python: each row runs the validation rules and two primary-key lookups "
         "(duplicate check and current version) before its insert. That is simple to explain and fast enough here. "
         "Next step: look keys up in bulk (one query per batch into a dict) and insert with `executemany`.",
-        "- **Rebuild** reads the whole current ledger once per batch, even in incremental mode. Next step: filter "
-        "`v_movement_leg` to the affected pairs and dates, or keep a materialised current-version table.",
+        "- **Rebuild** reads every leg of each affected pair, from its first movement, although only the days "
+        "from the earliest affected date are rewritten. Next step: also filter the read by date and start from "
+        "the stored closing of the day before; or keep a materialised current-version table.",
         "- **Bigger data**: the same SQL runs on DuckDB (columnar, parallel) with few changes, and Polars could do "
         "the dense-grid build as vectorised window operations. For years of history, partition balances by month "
         "so a backdated correction only rewrites the partitions from its date onwards.",
@@ -255,7 +287,10 @@ def main() -> int:
     parser.add_argument("--work-dir", type=Path, default=REPO_ROOT / "output" / "benchmark")
     parser.add_argument("--doc", type=Path, default=REPO_ROOT / "docs" / "benchmark.md")
     parser.add_argument("--json", type=Path, default=REPO_ROOT / "docs" / "evidence" / "benchmark_results.json")
+    parser.add_argument("--baseline", type=Path, default=REPO_ROOT / "docs" / "evidence" / "benchmark_baseline.json",
+                        help="Earlier results JSON to compare against (skipped if the file does not exist)")
     args = parser.parse_args()
+    baseline = json.loads(args.baseline.read_text(encoding="utf-8")) if args.baseline and args.baseline.exists() else None
 
     config = generator.GeneratorConfig(rows=args.rows, seed=args.seed)
     shutil.rmtree(args.data_dir, ignore_errors=True)
@@ -337,9 +372,11 @@ def main() -> int:
         "full": full,
         "incremental_equals_full": same,
     }
+    if baseline and baseline.get("config") == results_doc["config"]:
+        results_doc["baseline"] = {k: baseline[k] for k in ("finished_at", "load", "incremental", "full")}
     args.json.parent.mkdir(parents=True, exist_ok=True)
-    args.json.write_text(json.dumps(results_doc, indent=2) + "\n", encoding="utf-8")
-    args.doc.write_text(render_markdown(results_doc), encoding="utf-8")
+    args.json.write_text(json.dumps(results_doc, indent=2) + "\n", encoding="utf-8", newline="\n")
+    args.doc.write_text(render_markdown(results_doc), encoding="utf-8", newline="\n")
     print(f"load: {total_rows:,} rows in {load_seconds:.2f}s ({total_rows / load_seconds:,.0f} rows/s); "
           f"reconciliation {rec.overall_status}; oracle match: rejects={oracle['rejects_by_reason_match']} "
           f"batches={oracle['batch_counts_match']} balance_mismatches={oracle['final_balance_mismatched_pairs']}; "

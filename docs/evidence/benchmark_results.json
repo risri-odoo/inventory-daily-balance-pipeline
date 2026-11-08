@@ -1,0 +1,527 @@
+{
+  "finished_at": "2026-11-08T09:53:56Z",
+  "config": {
+    "rows": 100000,
+    "seed": 42,
+    "skus": 50,
+    "locations": 10,
+    "days": 30,
+    "batches": 10,
+    "start_date": "2026-03-01",
+    "invalid_rate": 0.02,
+    "duplicate_rate": 0.01,
+    "conflict_rate": 0.005,
+    "correction_rate": 0.01,
+    "late_rate": 0.02,
+    "opening_share": 0.7
+  },
+  "machine": {
+    "cpu": "12th Gen Intel(R) Core(TM) i5-1240P",
+    "logical_cpus": "16",
+    "os": "Windows 11 (AMD64)",
+    "python": "3.13.7",
+    "sqlite": "3.50.4"
+  },
+  "generator": {
+    "rows_written": 100000,
+    "batch_files": 10,
+    "base_events": 95500,
+    "corrections": 1000,
+    "duplicates": 1000,
+    "conflicts": 500,
+    "invalid": 2000,
+    "late": 2305,
+    "horizon": "2026-03-30",
+    "pairs": 500,
+    "seconds": 1.774
+  },
+  "load": {
+    "rows": 100000,
+    "seconds": 22.234,
+    "rows_per_second": 4497.5,
+    "reference_ms": 39,
+    "stage_totals_ms": {
+      "read": 589,
+      "validate_load": 8605,
+      "rebuild": 12168
+    },
+    "balance_rows": 15000,
+    "pairs": 500,
+    "batches": [
+      {
+        "source_file": "batch_001.csv",
+        "status": "SUCCESS",
+        "rows_read": 9557,
+        "rows_accepted": 9357,
+        "rows_rejected": 188,
+        "rows_duplicate": 12,
+        "rows_late": 0,
+        "rows_superseding": 6,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 1500,
+        "duration_ms": 828,
+        "stage_timings_ms": {
+          "read": 64,
+          "validate_load": 603,
+          "rebuild": 136
+        }
+      },
+      {
+        "source_file": "batch_002.csv",
+        "status": "SUCCESS",
+        "rows_read": 9644,
+        "rows_accepted": 9434,
+        "rows_rejected": 188,
+        "rows_duplicate": 22,
+        "rows_late": 68,
+        "rows_superseding": 12,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 1691,
+        "duration_ms": 1094,
+        "stage_timings_ms": {
+          "read": 58,
+          "validate_load": 633,
+          "rebuild": 379
+        }
+      },
+      {
+        "source_file": "batch_003.csv",
+        "status": "SUCCESS",
+        "rows_read": 9858,
+        "rows_accepted": 9602,
+        "rows_rejected": 218,
+        "rows_duplicate": 38,
+        "rows_late": 211,
+        "rows_superseding": 24,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 2231,
+        "duration_ms": 1342,
+        "stage_timings_ms": {
+          "read": 54,
+          "validate_load": 686,
+          "rebuild": 572
+        }
+      },
+      {
+        "source_file": "batch_004.csv",
+        "status": "SUCCESS",
+        "rows_read": 9899,
+        "rows_accepted": 9566,
+        "rows_rejected": 273,
+        "rows_duplicate": 60,
+        "rows_late": 200,
+        "rows_superseding": 42,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 2246,
+        "duration_ms": 1629,
+        "stage_timings_ms": {
+          "read": 58,
+          "validate_load": 751,
+          "rebuild": 794
+        }
+      },
+      {
+        "source_file": "batch_005.csv",
+        "status": "SUCCESS",
+        "rows_read": 9960,
+        "rows_accepted": 9649,
+        "rows_rejected": 235,
+        "rows_duplicate": 76,
+        "rows_late": 257,
+        "rows_superseding": 55,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 2529,
+        "duration_ms": 1968,
+        "stage_timings_ms": {
+          "read": 60,
+          "validate_load": 855,
+          "rebuild": 1028
+        }
+      },
+      {
+        "source_file": "batch_006.csv",
+        "status": "SUCCESS",
+        "rows_read": 9971,
+        "rows_accepted": 9628,
+        "rows_rejected": 255,
+        "rows_duplicate": 88,
+        "rows_late": 228,
+        "rows_superseding": 77,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 2542,
+        "duration_ms": 2274,
+        "stage_timings_ms": {
+          "read": 57,
+          "validate_load": 863,
+          "rebuild": 1327
+        }
+      },
+      {
+        "source_file": "batch_007.csv",
+        "status": "SUCCESS",
+        "rows_read": 10019,
+        "rows_accepted": 9639,
+        "rows_rejected": 275,
+        "rows_duplicate": 105,
+        "rows_late": 260,
+        "rows_superseding": 90,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 2793,
+        "duration_ms": 2663,
+        "stage_timings_ms": {
+          "read": 65,
+          "validate_load": 978,
+          "rebuild": 1591
+        }
+      },
+      {
+        "source_file": "batch_008.csv",
+        "status": "SUCCESS",
+        "rows_read": 10068,
+        "rows_accepted": 9691,
+        "rows_rejected": 244,
+        "rows_duplicate": 133,
+        "rows_late": 299,
+        "rows_superseding": 134,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 3039,
+        "duration_ms": 3029,
+        "stage_timings_ms": {
+          "read": 43,
+          "validate_load": 1085,
+          "rebuild": 1875
+        }
+      },
+      {
+        "source_file": "batch_009.csv",
+        "status": "SUCCESS",
+        "rows_read": 10228,
+        "rows_accepted": 9735,
+        "rows_rejected": 303,
+        "rows_duplicate": 190,
+        "rows_late": 318,
+        "rows_superseding": 165,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 3267,
+        "duration_ms": 3271,
+        "stage_timings_ms": {
+          "read": 61,
+          "validate_load": 1029,
+          "rebuild": 2154
+        }
+      },
+      {
+        "source_file": "batch_010.csv",
+        "status": "SUCCESS",
+        "rows_read": 10796,
+        "rows_accepted": 10199,
+        "rows_rejected": 321,
+        "rows_duplicate": 276,
+        "rows_late": 464,
+        "rows_superseding": 243,
+        "pairs_rebuilt": 500,
+        "balance_rows_written": 4048,
+        "duration_ms": 3534,
+        "stage_timings_ms": {
+          "read": 69,
+          "validate_load": 1122,
+          "rebuild": 2312
+        }
+      }
+    ]
+  },
+  "reconcile": {
+    "seconds": 4.732,
+    "overall_status": "PASS",
+    "checks": {
+      "run_counts": "PASS",
+      "independent_recompute": "PASS",
+      "continuity": "PASS",
+      "row_arithmetic": "PASS",
+      "component_totals": "PASS",
+      "transfer_balance": "PASS",
+      "pair_coverage": "PASS",
+      "current_version_unique": "PASS",
+      "referential_integrity": "PASS",
+      "quarantine_traceability": "PASS",
+      "closed_period_legs": "PASS",
+      "negative_balances": "PASS"
+    }
+  },
+  "oracle": {
+    "rejects_by_reason_match": true,
+    "rejects_by_reason": {
+      "BEFORE_OPENING_SNAPSHOT": 166,
+      "CONFLICTING_DUPLICATE": 500,
+      "DUPLICATE_EVENT": 1000,
+      "FUTURE_DATED": 166,
+      "INVALID_DATE": 167,
+      "INVALID_MOVEMENT_TYPE": 167,
+      "INVALID_QUANTITY": 167,
+      "INVALID_TIMESTAMP": 167,
+      "INVALID_TRANSFER": 166,
+      "INVALID_VERSION": 167,
+      "MALFORMED_ROW": 167,
+      "MISSING_REQUIRED_FIELD": 167,
+      "UNKNOWN_LOCATION": 166,
+      "UNKNOWN_SKU": 167
+    },
+    "final_balance_pairs": 500,
+    "final_balance_mismatched_pairs": 0,
+    "batch_counts_match": true
+  },
+  "late_rows": 50,
+  "late_days_before_horizon": 5,
+  "repeats": 3,
+  "incremental": {
+    "mode": "incremental",
+    "rebuild_ms_median": 288,
+    "total_ms_median": 333,
+    "rebuild_ms_all": [
+      288,
+      284,
+      290
+    ],
+    "pairs_rebuilt": 50,
+    "balance_rows_written": 300,
+    "min_affected_date": "2026-03-25"
+  },
+  "full": {
+    "mode": "full rebuild",
+    "rebuild_ms_median": 919,
+    "total_ms_median": 956,
+    "rebuild_ms_all": [
+      996,
+      893,
+      919
+    ],
+    "pairs_rebuilt": 500,
+    "balance_rows_written": 15000,
+    "min_affected_date": "2026-03-25"
+  },
+  "incremental_equals_full": true,
+  "baseline": {
+    "finished_at": "2026-11-08T09:49:00Z",
+    "load": {
+      "rows": 100000,
+      "seconds": 48.144,
+      "rows_per_second": 2077.1,
+      "reference_ms": 39,
+      "stage_totals_ms": {
+        "read": 987,
+        "validate_load": 15990,
+        "rebuild": 30063
+      },
+      "balance_rows": 15000,
+      "pairs": 500,
+      "batches": [
+        {
+          "source_file": "batch_001.csv",
+          "status": "SUCCESS",
+          "rows_read": 9557,
+          "rows_accepted": 9357,
+          "rows_rejected": 188,
+          "rows_duplicate": 12,
+          "rows_late": 0,
+          "rows_superseding": 6,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 1500,
+          "duration_ms": 708,
+          "stage_timings_ms": {
+            "read": 43,
+            "validate_load": 500,
+            "rebuild": 143
+          }
+        },
+        {
+          "source_file": "batch_002.csv",
+          "status": "SUCCESS",
+          "rows_read": 9644,
+          "rows_accepted": 9434,
+          "rows_rejected": 188,
+          "rows_duplicate": 22,
+          "rows_late": 68,
+          "rows_superseding": 12,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 1691,
+          "duration_ms": 2557,
+          "stage_timings_ms": {
+            "read": 52,
+            "validate_load": 1540,
+            "rebuild": 939
+          }
+        },
+        {
+          "source_file": "batch_003.csv",
+          "status": "SUCCESS",
+          "rows_read": 9858,
+          "rows_accepted": 9602,
+          "rows_rejected": 218,
+          "rows_duplicate": 38,
+          "rows_late": 211,
+          "rows_superseding": 24,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 2231,
+          "duration_ms": 3291,
+          "stage_timings_ms": {
+            "read": 100,
+            "validate_load": 1644,
+            "rebuild": 1514
+          }
+        },
+        {
+          "source_file": "batch_004.csv",
+          "status": "SUCCESS",
+          "rows_read": 9899,
+          "rows_accepted": 9566,
+          "rows_rejected": 273,
+          "rows_duplicate": 60,
+          "rows_late": 200,
+          "rows_superseding": 42,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 2246,
+          "duration_ms": 4011,
+          "stage_timings_ms": {
+            "read": 123,
+            "validate_load": 1674,
+            "rebuild": 2176
+          }
+        },
+        {
+          "source_file": "batch_005.csv",
+          "status": "SUCCESS",
+          "rows_read": 9960,
+          "rows_accepted": 9649,
+          "rows_rejected": 235,
+          "rows_duplicate": 76,
+          "rows_late": 257,
+          "rows_superseding": 55,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 2529,
+          "duration_ms": 4555,
+          "stage_timings_ms": {
+            "read": 95,
+            "validate_load": 1673,
+            "rebuild": 2749
+          }
+        },
+        {
+          "source_file": "batch_006.csv",
+          "status": "SUCCESS",
+          "rows_read": 9971,
+          "rows_accepted": 9628,
+          "rows_rejected": 255,
+          "rows_duplicate": 88,
+          "rows_late": 228,
+          "rows_superseding": 77,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 2542,
+          "duration_ms": 5193,
+          "stage_timings_ms": {
+            "read": 117,
+            "validate_load": 1719,
+            "rebuild": 3315
+          }
+        },
+        {
+          "source_file": "batch_007.csv",
+          "status": "SUCCESS",
+          "rows_read": 10019,
+          "rows_accepted": 9639,
+          "rows_rejected": 275,
+          "rows_duplicate": 105,
+          "rows_late": 260,
+          "rows_superseding": 90,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 2793,
+          "duration_ms": 5621,
+          "stage_timings_ms": {
+            "read": 107,
+            "validate_load": 1728,
+            "rebuild": 3748
+          }
+        },
+        {
+          "source_file": "batch_008.csv",
+          "status": "SUCCESS",
+          "rows_read": 10068,
+          "rows_accepted": 9691,
+          "rows_rejected": 244,
+          "rows_duplicate": 133,
+          "rows_late": 299,
+          "rows_superseding": 134,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 3039,
+          "duration_ms": 6401,
+          "stage_timings_ms": {
+            "read": 103,
+            "validate_load": 1734,
+            "rebuild": 4530
+          }
+        },
+        {
+          "source_file": "batch_009.csv",
+          "status": "SUCCESS",
+          "rows_read": 10228,
+          "rows_accepted": 9735,
+          "rows_rejected": 303,
+          "rows_duplicate": 190,
+          "rows_late": 318,
+          "rows_superseding": 165,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 3267,
+          "duration_ms": 7067,
+          "stage_timings_ms": {
+            "read": 112,
+            "validate_load": 1837,
+            "rebuild": 5083
+          }
+        },
+        {
+          "source_file": "batch_010.csv",
+          "status": "SUCCESS",
+          "rows_read": 10796,
+          "rows_accepted": 10199,
+          "rows_rejected": 321,
+          "rows_duplicate": 276,
+          "rows_late": 464,
+          "rows_superseding": 243,
+          "pairs_rebuilt": 500,
+          "balance_rows_written": 4048,
+          "duration_ms": 7983,
+          "stage_timings_ms": {
+            "read": 135,
+            "validate_load": 1941,
+            "rebuild": 5866
+          }
+        }
+      ]
+    },
+    "incremental": {
+      "mode": "incremental",
+      "rebuild_ms_median": 3319,
+      "total_ms_median": 3416,
+      "rebuild_ms_all": [
+        3267,
+        3319,
+        3374
+      ],
+      "pairs_rebuilt": 50,
+      "balance_rows_written": 300,
+      "min_affected_date": "2026-03-25"
+    },
+    "full": {
+      "mode": "full rebuild",
+      "rebuild_ms_median": 3569,
+      "total_ms_median": 3708,
+      "rebuild_ms_all": [
+        3687,
+        3569,
+        3568
+      ],
+      "pairs_rebuilt": 500,
+      "balance_rows_written": 15000,
+      "min_affected_date": "2026-03-25"
+    }
+  }
+}

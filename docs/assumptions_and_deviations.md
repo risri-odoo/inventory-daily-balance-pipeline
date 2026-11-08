@@ -32,6 +32,10 @@ Every assumption made where the spec was silent, and every deviation from the sp
 | A23 | Reference loads | Reference files are trusted master data: any bad value fails the whole load (rolled back) instead of quarantining rows. Upserts never delete rows missing from a newer file. Each load is logged as a `pipeline_run` with `source_file = 'reference'`. | Master data errors should stop the line; deletes of master data are out of scope. |
 | A24 | IDs and timestamps | `run_id` = `run-<UTC yyyymmddThhmmssZ>-<8 hex>`: unique and sortable. `ingested_at` / `quarantined_at` use the run's start time, so all rows of one run share one timestamp. | Readable, ordered run ids, consistent timestamps within a run. |
 
+| A25 | Demo database | `demo` always uses and recreates `<output-dir>/demo.db` and has no `--db` option. Reports go to the output dir. | "A fresh DB" every time, without any risk of wiping the database the other commands use. |
+| A26 | Extra reconciliation check | Besides the checks in the spec, `closed_period_legs` WARNs if an accepted leg is dated on or before its pair's opening `as_of_date` (only possible if an opening balance changed after loading, see A19). `pair_coverage` also checks each pair *starts* on the right date and that no unexpected pairs exist. | Makes the A19 exclusion visible instead of silent, and proves the dense grid end to end. |
+| A27 | Report exit code | `reconcile`, `report` and `demo` exit with 1 when any check is FAIL. WARN (e.g. negative balances) still exits 0. | The spec treats negative stock as a warning, not a failure. |
+
 ## Deviations
 
 | # | Spec | What was done | Why |

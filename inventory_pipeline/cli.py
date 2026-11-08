@@ -1,6 +1,6 @@
 """Command-line interface: `python -m inventory_pipeline <command>`.
 
-Commands: init, load-reference, run, reconcile, report, demo.
+Commands: init, load-reference, run, reconcile, report, generate, demo.
 The exit code is non-zero when a run is FAILED or REJECTED, or a reconciliation check FAILS.
 """
 
@@ -10,7 +10,7 @@ import sqlite3
 from pathlib import Path
 from typing import Optional, Sequence
 
-from inventory_pipeline import config, db, pipeline, reconcile, report
+from inventory_pipeline import config, db, generator, pipeline, reconcile, report
 from inventory_pipeline.logs import close_logging, log_event, setup_logging
 
 # data/sample next to the package, so `demo` works from any current directory.
@@ -67,6 +67,22 @@ def build_parser() -> argparse.ArgumentParser:
                                  help="Fresh demo.db -> sample reference -> sample input -> reconcile -> report")
     demo.add_argument("--sample-dir", type=Path, default=DEFAULT_SAMPLE_DIR,
                       help="Folder with reference/ and input/ (default: data/sample in this repository)")
+
+    defaults = generator.GeneratorConfig()
+    gen = subparsers.add_parser("generate", help="Generate synthetic reference data, batches and oracle labels")
+    gen.add_argument("--out", type=Path, default=Path("data/generated"), help="Output folder (default: data/generated)")
+    gen.add_argument("--rows", type=int, default=defaults.rows, help=f"Total movement rows (default: {defaults.rows})")
+    gen.add_argument("--seed", type=int, default=defaults.seed, help=f"Random seed (default: {defaults.seed})")
+    gen.add_argument("--skus", type=int, default=defaults.skus)
+    gen.add_argument("--locations", type=int, default=defaults.locations)
+    gen.add_argument("--days", type=int, default=defaults.days)
+    gen.add_argument("--batches", type=int, default=defaults.batches)
+    gen.add_argument("--start-date", default=defaults.start_date)
+    gen.add_argument("--invalid-rate", type=float, default=defaults.invalid_rate)
+    gen.add_argument("--duplicate-rate", type=float, default=defaults.duplicate_rate)
+    gen.add_argument("--conflict-rate", type=float, default=defaults.conflict_rate)
+    gen.add_argument("--correction-rate", type=float, default=defaults.correction_rate)
+    gen.add_argument("--late-rate", type=float, default=defaults.late_rate)
 
     return parser
 
@@ -212,6 +228,24 @@ def cmd_demo(args: argparse.Namespace) -> int:
         close_logging()
 
 
+def cmd_generate(args: argparse.Namespace) -> int:
+    """Generate synthetic data and oracle labels."""
+    gen_config = generator.GeneratorConfig(
+        rows=args.rows, seed=args.seed, skus=args.skus, locations=args.locations, days=args.days,
+        batches=args.batches, start_date=args.start_date, invalid_rate=args.invalid_rate,
+        duplicate_rate=args.duplicate_rate, conflict_rate=args.conflict_rate,
+        correction_rate=args.correction_rate, late_rate=args.late_rate,
+    )
+    summary = generator.generate(gen_config, args.out)
+    print(
+        f"event=generate status=SUCCESS out={display_path(args.out)} seed={gen_config.seed} "
+        f"rows_written={summary.rows_written} batch_files={summary.batch_files} base_events={summary.base_events} "
+        f"corrections={summary.corrections} duplicates={summary.duplicates} conflicts={summary.conflicts} "
+        f"invalid={summary.invalid} late={summary.late} pairs={summary.pairs} horizon={summary.horizon}"
+    )
+    return 0
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Parse the arguments, run the chosen command and return its exit code."""
     args = build_parser().parse_args(argv)
@@ -225,6 +259,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         return cmd_reconcile(args)
     if args.command == "report":
         return cmd_report(args)
+    if args.command == "generate":
+        return cmd_generate(args)
     if args.command == "demo":
         return cmd_demo(args)
     raise ValueError(f"unknown command: {args.command}")

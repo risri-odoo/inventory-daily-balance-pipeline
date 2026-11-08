@@ -13,10 +13,12 @@ from pathlib import Path
 
 from inventory_pipeline.reconcile import ReconciliationReport
 
+# Runs are ordered by rowid, i.e. the order they were inserted: started_at has only
+# 1-second resolution, so two runs in the same second would otherwise come out in random order.
 EXPORTS = {
     "daily_inventory_balance.csv": "SELECT * FROM daily_inventory_balance ORDER BY sku, location_id, balance_date",
     "quarantine_movement.csv": "SELECT * FROM quarantine_movement ORDER BY quarantine_id",
-    "pipeline_run.csv": "SELECT * FROM pipeline_run ORDER BY started_at, run_id",
+    "pipeline_run.csv": "SELECT * FROM pipeline_run ORDER BY rowid",
 }
 
 
@@ -46,7 +48,7 @@ def run_summary(conn: sqlite3.Connection) -> list[dict]:
         SELECT run_id, source_file, status, rows_read, rows_accepted, rows_rejected, rows_duplicate,
                rows_late, rows_superseding, min_affected_date, pairs_rebuilt, balance_rows_written,
                negative_balance_rows, duration_ms, error_message
-        FROM pipeline_run ORDER BY started_at, run_id
+        FROM pipeline_run ORDER BY rowid
         """
     )]
 

@@ -83,7 +83,7 @@ def test_run_counts_are_right(sample_db: sqlite3.Connection) -> None:
     actual = [
         {c: str(row[c]) for c in columns}
         for row in sample_db.execute(
-            f"SELECT {', '.join(columns)} FROM pipeline_run WHERE source_file LIKE 'batch_%' ORDER BY started_at, run_id"
+            f"SELECT {', '.join(columns)} FROM pipeline_run WHERE source_file LIKE 'batch_%' ORDER BY rowid"
         )
     ]
     assert actual == read_csv(EXPECTED / "expected_run_counts.csv")

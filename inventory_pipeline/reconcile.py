@@ -101,7 +101,7 @@ def check_run_counts(conn: sqlite3.Connection) -> CheckResult:
                (SELECT COUNT(*) FROM quarantine_movement q
                  WHERE q.run_id = r.run_id AND q.reject_reason = 'DUPLICATE_EVENT') AS table_duplicate
         FROM pipeline_run AS r
-        ORDER BY r.started_at, r.run_id
+        ORDER BY r.rowid  -- insertion order (started_at has only 1-second resolution)
     """)
     failing = []
     for row in rows:

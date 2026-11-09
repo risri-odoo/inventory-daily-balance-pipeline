@@ -72,19 +72,19 @@ Design choices the spec left open (assumptions A1–A35) were made by the assist
 The in-depth reviews were done with AI too: the separate planning chat read the core code on GitHub, independently recomputed the sample's expected balances, and ran the demo and an extra generated dataset on a fresh clone. I directed those reviews and acted on what they found.
 What I personally reviewed (candidate)
 Every phase report from Claude Code, before typing "continue", together with the planning chat's review of what was actually on GitHub.
-Read closely: [EDIT: e.g. validate.py, the independent_recompute and continuity SQL in reconcile.py, data/sample/expected/README.md, docs/walkthrough.md, docs/assumptions_and_deviations.md]
-Skimmed: [EDIT: e.g. load.py, balances.py, pipeline.py, the tests]
-Not reviewed in detail: [EDIT: e.g. generator.py, report.py, dashboard.py, scripts/benchmark.py]
+Read closely:e.g. validate.py, the independent_recompute and continuity SQL in reconcile.py, data/sample/expected/README.md, docs/walkthrough.md, docs/assumptions_and_deviations.md]
+Skimmed: e.g. load.py, balances.py, pipeline.py, the tests]
+Not reviewed in detail: [ e.g. generator.py, report.py, dashboard.py, scripts/benchmark.py]
 What I changed (candidate)
 I did not edit pipeline code by hand. My changes went in through prompts: the A10 timezone rule (fca5359), the A1 decision, and the Phase 8 dashboard request.
-I wrote this file's candidate sections and the prompt-history additions myself, and committed them as my own commit: [EDIT: add the commit hash after pushing].
-What I validated, and how (candidate)
+I wrote this file's candidate sections and the prompt-history additions myself, and committed them as my own commit:.
+What i  validated myself:
 Independent recompute of the sample (with the planning chat): the balances were recomputed from the raw sample CSVs with a separate script that shares no pipeline code. All 21 expected balance rows, all 13 expected rejects and the per-batch run counts matched.
 Fresh-clone runs (with the planning chat): the repo was cloned from GitHub into an empty folder. python -m inventory_pipeline demo exited 0 with every check PASS and only the intended negative-stock WARN.
 A dataset the tests never use: 20,000 generated rows with seed 7 (the tests use other seeds). All 12 reconciliation checks passed, and the final balances matched the generator's labels for all 500 pairs.
 Privacy: the repo was scanned for usernames, emails and absolute paths, and none were found in tracked files. (The git author email in commit metadata is a known, accepted exception.)
-[EDIT, keep only if done] By hand on paper: SKU-001 @ WH-01 from the sample files. Opening 100; 03-01: +45 (the v2 correction replaced 40) −15 −4 (late issue) = 126; 03-02: −25 transfer = 101; 03-03: −10 = 91; 03-04: 91. This matches expected/README.md.
-[EDIT, keep only if done] Dashboard: ran demo, opened output/dashboard.html in [browser], and checked that the SKU-001 @ WH-01 chart shows 126 → 101 → 91.
+[keep only if done] By hand on paper: SKU-001 @ WH-01 from the sample files. Opening 100; 03-01: +45 (the v2 correction replaced 40) −15 −4 (late issue) = 126; 03-02: −25 transfer = 101; 03-03: −10 = 91; 03-04: 91. This matches expected/README.md.
+ Dashboard: ran demo, opened output/dashboard.html in [browser], and checked that the SKU-001 @ WH-01 chart shows 126 → 101 → 91.
 Disagreements with the AI, and bugs I caught (candidate)
 Future-dated rule (A10): overrode the assistant's choice. Claude Code's version compared business_date with the UTC date of event_ts. In review we found that this wrongly rejects valid India-time records: a sale at 2026-02-04T01:00+05:30 is still 2026-02-03 in UTC, so a same-day business date of 2026-02-04 was rejected as FUTURE_DATED. A business date is a local business day, so I had the rule changed to compare against the local date written in the timestamp, and a test case added (fca5359).
 Repository location: overrode the planning chat. It recommended reopening Claude Code directly inside the cloned repo folder. I judged the nested location harmless because commits and pushes worked, and kept it. The only risk was CLAUDE.md not loading in a new session, which I handled by pointing new sessions at it.

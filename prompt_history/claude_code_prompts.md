@@ -62,3 +62,44 @@ Docs: a README section with how to open it, an entry in docs/architecture.md, an
 Same rules as before: run the tests, explain in plain English, commit as `feat: add read-only HTML dashboard`, push only if pytest exits 0, then stop.
 
  ??
+
+## 2026-11-08T12:01:09Z
+
+can u investigate what all parts are left from here ?? -->
+
+1. Complete the prompt history, from the Guidelines (point 03) and FAQ Q6: “Include all prompts submitted to every AI tool you used.”
+
+Copy 01_planning_and_review_chat.md (this chat’s prompts) into your repo’s prompt_history/ folder.
+In Claude Code, run /export and save the file into prompt_history/.
+Fill in the TODO (candidate) in prompt_history/README.md: list both tools (this Claude desktop chat for planning and review, Claude Code for the build) and what each was used for.
+
+2. Fill in your sections of AI_USAGE.md, from the Guidelines (point 03): “explain where AI accelerated your work, where you relied heavily on it, and what you personally reviewed, changed, or validated.”
+
+There are 6 TODO (candidate) sections. Write them in your own words, honestly. For example, say that a separate Claude chat did the deep reviews, and that you asked for the A10 timezone fix.
+Right now those sections are empty placeholders, and a reviewer would notice straight away.
+
+3. Commit and push those changes yourself, from the Guidelines (point 02), “meaningful commits”. Use a message like docs: add AI usage disclosure and prompt history. This also puts commits you made into the history.
+
+Strongly recommended (it’s about the interview)
+
+4. The 5-minute paper check. Recompute SKU-001 @ WH-01 by hand (100 → 126 → 101 → 91). Then you can truthfully write “I verified it” in AI_USAGE.md, so do this before step 2.
+
+5. Read docs/walkthrough.md and practise the 10 questions. The Guidelines say: “Be ready to walk us through your solution.”
+
+Then, only if time allows
+
+6. Phase 8, the dashboard. It’s optional and not graded, and it’s nice for the demo.
+
+Before submitting
+
+7. Check the deadline (72 hours from when they sent the project), and send the link from your recruitment email (FAQ Q3).
+
+The order I’d go in: 4 → 1 → 2 → 3, then 5, then the dashboard if you have time, then submit. Steps 1 to 4 take about an hour.
+
+## 2026-11-08T12:08:40Z
+
+give a project structure and also the details of all the phases ??
+
+## 2026-11-09T09:37:05Z
+
+redo evidence

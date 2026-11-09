@@ -1,4 +1,4 @@
 run_id,source_file,file_sha256,status,started_at,ended_at,duration_ms,rows_read,rows_accepted,rows_rejected,rows_duplicate,rows_late,rows_superseding,min_affected_date,pairs_rebuilt,balance_rows_written,negative_balance_rows,schema_warnings,stage_timings_ms,error_message
-run-20261108T105808Z-399f5453,reference,,SUCCESS,2026-11-08T10:58:08Z,2026-11-08T10:58:08Z,44,0,0,0,0,0,0,,3,0,0,[],{},
-run-20261108T105808Z-2145111d,batch_01.csv,af09fbd488908d128becc8fa212493e2c1dc8cc53f502e35caad39568c575c7c,SUCCESS,2026-11-08T10:58:08Z,2026-11-08T10:58:08Z,18,17,8,8,1,0,0,2026-03-01,4,7,0,[],"{""read"": 0, ""validate_load"": 4, ""rebuild"": 1}",
-run-20261108T105808Z-1092996f,batch_02.csv,1589f6704f33bc8076395b8a431f9390c68aeb54b18b3551ab2ef080e48a4a1a,SUCCESS,2026-11-08T10:58:08Z,2026-11-08T10:58:08Z,18,14,10,4,0,4,2,2026-03-01,7,18,2,[],"{""read"": 0, ""validate_load"": 4, ""rebuild"": 1}",
+run-20261109T093805Z-3150e8ed,reference,,SUCCESS,2026-11-09T09:38:05Z,2026-11-09T09:38:05Z,52,0,0,0,0,0,0,,3,0,0,[],{},
+run-20261109T093805Z-ac9a4307,batch_01.csv,af09fbd488908d128becc8fa212493e2c1dc8cc53f502e35caad39568c575c7c,SUCCESS,2026-11-09T09:38:05Z,2026-11-09T09:38:05Z,31,17,8,8,1,0,0,2026-03-01,4,7,0,[],"{""read"": 0, ""validate_load"": 3, ""rebuild"": 1}",
+run-20261109T093805Z-989f419f,batch_02.csv,1589f6704f33bc8076395b8a431f9390c68aeb54b18b3551ab2ef080e48a4a1a,SUCCESS,2026-11-09T09:38:05Z,2026-11-09T09:38:05Z,30,14,10,4,0,4,2,2026-03-01,7,18,2,[],"{""read"": 0, ""validate_load"": 3, ""rebuild"": 0}",

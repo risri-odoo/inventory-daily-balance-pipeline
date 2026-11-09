@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-08T10:58:08Z",
+  "generated_at": "2026-11-09T09:38:05Z",
   "overall_status": "WARN",
   "checks": [
     {
@@ -174,7 +174,7 @@
   ],
   "runs": [
     {
-      "run_id": "run-20261108T105808Z-399f5453",
+      "run_id": "run-20261109T093805Z-3150e8ed",
       "source_file": "reference",
       "status": "SUCCESS",
       "rows_read": 0,
@@ -187,11 +187,11 @@
       "pairs_rebuilt": 3,
       "balance_rows_written": 0,
       "negative_balance_rows": 0,
-      "duration_ms": 44,
+      "duration_ms": 52,
       "error_message": null
     },
     {
-      "run_id": "run-20261108T105808Z-2145111d",
+      "run_id": "run-20261109T093805Z-ac9a4307",
       "source_file": "batch_01.csv",
       "status": "SUCCESS",
       "rows_read": 17,
@@ -204,11 +204,11 @@
       "pairs_rebuilt": 4,
       "balance_rows_written": 7,
       "negative_balance_rows": 0,
-      "duration_ms": 18,
+      "duration_ms": 31,
       "error_message": null
     },
     {
-      "run_id": "run-20261108T105808Z-1092996f",
+      "run_id": "run-20261109T093805Z-989f419f",
       "source_file": "batch_02.csv",
       "status": "SUCCESS",
       "rows_read": 14,
@@ -221,7 +221,7 @@
       "pairs_rebuilt": 7,
       "balance_rows_written": 18,
       "negative_balance_rows": 2,
-      "duration_ms": 18,
+      "duration_ms": 30,
       "error_message": null
     }
   ]

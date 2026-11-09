@@ -1,6 +1,6 @@
 # Reconciliation report
 
-Generated at: 2026-11-08T10:58:08Z
+Generated at: 2026-11-09T09:38:05Z
 
 **Overall status: WARN**
 
@@ -110,6 +110,6 @@ Examples:
 
 | run_id | source_file | status | rows_read | rows_accepted | rows_rejected | rows_duplicate | rows_late | rows_superseding | min_affected_date | pairs_rebuilt | balance_rows_written | negative_balance_rows | duration_ms | error_message |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| run-20261108T105808Z-399f5453 | reference | SUCCESS | 0 | 0 | 0 | 0 | 0 | 0 |  | 3 | 0 | 0 | 44 |  |
-| run-20261108T105808Z-2145111d | batch_01.csv | SUCCESS | 17 | 8 | 8 | 1 | 0 | 0 | 2026-03-01 | 4 | 7 | 0 | 18 |  |
-| run-20261108T105808Z-1092996f | batch_02.csv | SUCCESS | 14 | 10 | 4 | 0 | 4 | 2 | 2026-03-01 | 7 | 18 | 2 | 18 |  |
+| run-20261109T093805Z-3150e8ed | reference | SUCCESS | 0 | 0 | 0 | 0 | 0 | 0 |  | 3 | 0 | 0 | 52 |  |
+| run-20261109T093805Z-ac9a4307 | batch_01.csv | SUCCESS | 17 | 8 | 8 | 1 | 0 | 0 | 2026-03-01 | 4 | 7 | 0 | 31 |  |
+| run-20261109T093805Z-989f419f | batch_02.csv | SUCCESS | 14 | 10 | 4 | 0 | 4 | 2 | 2026-03-01 | 7 | 18 | 2 | 30 |  |

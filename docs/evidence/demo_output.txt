@@ -1,28 +1,29 @@
-2026-11-08T10:58:08Z level=INFO event=demo_started db_path=output/demo.db sample_dir=data/sample
-2026-11-08T10:58:08Z level=INFO event=run_started run_id=run-20261108T105808Z-399f5453 source_file=reference
-2026-11-08T10:58:08Z level=INFO event=reference_loaded run_id=run-20261108T105808Z-399f5453 sku_rows=3 location_rows=3 opening_rows=3 rows_changed=9 opening_changed=3
-2026-11-08T10:58:08Z level=INFO event=run_finished run_id=run-20261108T105808Z-399f5453 source_file=reference status=SUCCESS rows_read=0 rows_accepted=0 rows_rejected=0 rows_duplicate=0 rows_late=0 rows_superseding=0 min_affected_date="" pairs_rebuilt=3 balance_rows_written=0 negative_balance_rows=0 duration_ms=44 error=""
-2026-11-08T10:58:08Z level=INFO event=run_started run_id=run-20261108T105808Z-2145111d source_file=batch_01.csv file_sha256=af09fbd488908d128becc8fa212493e2c1dc8cc53f502e35caad39568c575c7c force=False full_rebuild=False fail_at=""
-2026-11-08T10:58:08Z level=INFO event=run_finished run_id=run-20261108T105808Z-2145111d source_file=batch_01.csv status=SUCCESS rows_read=17 rows_accepted=8 rows_rejected=8 rows_duplicate=1 rows_late=0 rows_superseding=0 min_affected_date=2026-03-01 pairs_rebuilt=4 balance_rows_written=7 negative_balance_rows=0 duration_ms=18 error=""
-2026-11-08T10:58:08Z level=INFO event=run_started run_id=run-20261108T105808Z-1092996f source_file=batch_02.csv file_sha256=1589f6704f33bc8076395b8a431f9390c68aeb54b18b3551ab2ef080e48a4a1a force=False full_rebuild=False fail_at=""
-2026-11-08T10:58:08Z level=INFO event=run_finished run_id=run-20261108T105808Z-1092996f source_file=batch_02.csv status=SUCCESS rows_read=14 rows_accepted=10 rows_rejected=4 rows_duplicate=0 rows_late=4 rows_superseding=2 min_affected_date=2026-03-01 pairs_rebuilt=7 balance_rows_written=18 negative_balance_rows=2 duration_ms=18 error=""
-2026-11-08T10:58:08Z level=INFO event=check name=run_counts status=PASS failures=0 details="3 runs checked; rows read by successful runs = 31; rows in tables = 31"
-2026-11-08T10:58:08Z level=INFO event=check name=independent_recompute status=PASS failures=0 details="13 (pair, movement date) points compared"
-2026-11-08T10:58:08Z level=INFO event=check name=continuity status=PASS failures=0 details=""
-2026-11-08T10:58:08Z level=INFO event=check name=row_arithmetic status=PASS failures=0 details="21 balance rows checked"
-2026-11-08T10:58:08Z level=INFO event=check name=component_totals status=PASS failures=0 details="ledger totals: receipt=63, issue=44, transfer_in=40, transfer_out=40, adjustment=0"
-2026-11-08T10:58:08Z level=INFO event=check name=transfer_balance status=PASS failures=0 details="transfer_in=40, transfer_out=40"
-2026-11-08T10:58:08Z level=INFO event=check name=pair_coverage status=PASS failures=0 details="7 pairs; global horizon 2026-03-04"
-2026-11-08T10:58:08Z level=INFO event=check name=current_version_unique status=PASS failures=0 details="15 distinct movements"
-2026-11-08T10:58:08Z level=INFO event=check name=referential_integrity status=PASS failures=0 details=""
-2026-11-08T10:58:08Z level=INFO event=check name=quarantine_traceability status=PASS failures=0 details="13 quarantine rows checked"
-2026-11-08T10:58:08Z level=INFO event=check name=closed_period_legs status=PASS failures=0 details=""
-2026-11-08T10:58:08Z level=WARNING event=check name=negative_balances status=WARN failures=2 details="2 negative rows across 1 pairs"
-2026-11-08T10:58:08Z level=INFO event=reconciliation_finished status=WARN
-2026-11-08T10:58:08Z level=INFO event=report_written path=output/reconciliation_report.md
-2026-11-08T10:58:08Z level=INFO event=report_written path=output/reconciliation_report.json
-2026-11-08T10:58:08Z level=INFO event=report_written path=output/daily_inventory_balance.csv
-2026-11-08T10:58:08Z level=INFO event=report_written path=output/quarantine_movement.csv
-2026-11-08T10:58:08Z level=INFO event=report_written path=output/pipeline_run.csv
-2026-11-08T10:58:08Z level=INFO event=demo_finished files=2 bad_runs=0 reconciliation=WARN exit_code=0
+2026-11-09T09:38:05Z level=INFO event=demo_started db_path=output/demo.db sample_dir=data/sample
+2026-11-09T09:38:05Z level=INFO event=run_started run_id=run-20261109T093805Z-3150e8ed source_file=reference
+2026-11-09T09:38:05Z level=INFO event=reference_loaded run_id=run-20261109T093805Z-3150e8ed sku_rows=3 location_rows=3 opening_rows=3 rows_changed=9 opening_changed=3
+2026-11-09T09:38:05Z level=INFO event=run_finished run_id=run-20261109T093805Z-3150e8ed source_file=reference status=SUCCESS rows_read=0 rows_accepted=0 rows_rejected=0 rows_duplicate=0 rows_late=0 rows_superseding=0 min_affected_date="" pairs_rebuilt=3 balance_rows_written=0 negative_balance_rows=0 duration_ms=52 error=""
+2026-11-09T09:38:05Z level=INFO event=run_started run_id=run-20261109T093805Z-ac9a4307 source_file=batch_01.csv file_sha256=af09fbd488908d128becc8fa212493e2c1dc8cc53f502e35caad39568c575c7c force=False full_rebuild=False fail_at=""
+2026-11-09T09:38:05Z level=INFO event=run_finished run_id=run-20261109T093805Z-ac9a4307 source_file=batch_01.csv status=SUCCESS rows_read=17 rows_accepted=8 rows_rejected=8 rows_duplicate=1 rows_late=0 rows_superseding=0 min_affected_date=2026-03-01 pairs_rebuilt=4 balance_rows_written=7 negative_balance_rows=0 duration_ms=31 error=""
+2026-11-09T09:38:05Z level=INFO event=run_started run_id=run-20261109T093805Z-989f419f source_file=batch_02.csv file_sha256=1589f6704f33bc8076395b8a431f9390c68aeb54b18b3551ab2ef080e48a4a1a force=False full_rebuild=False fail_at=""
+2026-11-09T09:38:05Z level=INFO event=run_finished run_id=run-20261109T093805Z-989f419f source_file=batch_02.csv status=SUCCESS rows_read=14 rows_accepted=10 rows_rejected=4 rows_duplicate=0 rows_late=4 rows_superseding=2 min_affected_date=2026-03-01 pairs_rebuilt=7 balance_rows_written=18 negative_balance_rows=2 duration_ms=30 error=""
+2026-11-09T09:38:05Z level=INFO event=check name=run_counts status=PASS failures=0 details="3 runs checked; rows read by successful runs = 31; rows in tables = 31"
+2026-11-09T09:38:05Z level=INFO event=check name=independent_recompute status=PASS failures=0 details="13 (pair, movement date) points compared"
+2026-11-09T09:38:05Z level=INFO event=check name=continuity status=PASS failures=0 details=""
+2026-11-09T09:38:05Z level=INFO event=check name=row_arithmetic status=PASS failures=0 details="21 balance rows checked"
+2026-11-09T09:38:05Z level=INFO event=check name=component_totals status=PASS failures=0 details="ledger totals: receipt=63, issue=44, transfer_in=40, transfer_out=40, adjustment=0"
+2026-11-09T09:38:05Z level=INFO event=check name=transfer_balance status=PASS failures=0 details="transfer_in=40, transfer_out=40"
+2026-11-09T09:38:05Z level=INFO event=check name=pair_coverage status=PASS failures=0 details="7 pairs; global horizon 2026-03-04"
+2026-11-09T09:38:05Z level=INFO event=check name=current_version_unique status=PASS failures=0 details="15 distinct movements"
+2026-11-09T09:38:05Z level=INFO event=check name=referential_integrity status=PASS failures=0 details=""
+2026-11-09T09:38:05Z level=INFO event=check name=quarantine_traceability status=PASS failures=0 details="13 quarantine rows checked"
+2026-11-09T09:38:05Z level=INFO event=check name=closed_period_legs status=PASS failures=0 details=""
+2026-11-09T09:38:05Z level=WARNING event=check name=negative_balances status=WARN failures=2 details="2 negative rows across 1 pairs"
+2026-11-09T09:38:05Z level=INFO event=reconciliation_finished status=WARN
+2026-11-09T09:38:05Z level=INFO event=report_written path=output/reconciliation_report.md
+2026-11-09T09:38:05Z level=INFO event=report_written path=output/reconciliation_report.json
+2026-11-09T09:38:05Z level=INFO event=report_written path=output/daily_inventory_balance.csv
+2026-11-09T09:38:05Z level=INFO event=report_written path=output/quarantine_movement.csv
+2026-11-09T09:38:05Z level=INFO event=report_written path=output/pipeline_run.csv
+2026-11-09T09:38:05Z level=INFO event=report_written path=output/dashboard.html
+2026-11-09T09:38:05Z level=INFO event=demo_finished files=2 bad_runs=0 reconciliation=WARN exit_code=0
 demo exit=0

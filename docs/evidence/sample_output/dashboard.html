@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inventory Dashboard</title>
+<style>
+:root {
+  --bg: #f7f7f5; --panel: #ffffff; --text: #1d1d1b; --muted: #6b6b66; --border: #e2e2dc;
+  --pass: #1f7a3d; --pass-bg: #e6f4ea; --warn: #8a5a00; --warn-bg: #fff3d6;
+  --fail: #b3261e; --fail-bg: #fde7e5; --accent: #2f5fb3; --neg-bg: #fde7e5;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161615; --panel: #20201e; --text: #ecece8; --muted: #a3a39c; --border: #34342f;
+    --pass: #7fd19b; --pass-bg: #1c3324; --warn: #f0c46b; --warn-bg: #3a2f14;
+    --fail: #ff9b93; --fail-bg: #3d1d1b; --accent: #8fb3ff; --neg-bg: #3d1d1b;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+       font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header, main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+h1 { font-size: 22px; margin: 8px 0 12px; }
+h2 { font-size: 17px; margin: 0 0 10px; }
+section { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+nav a { color: var(--accent); margin-right: 14px; text-decoration: none; }
+.muted { color: var(--muted); }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.tile { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.tile-label { color: var(--muted); font-size: 12px; }
+.tile-value { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.badge { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.badge-pass, .badge-success { color: var(--pass); background: var(--pass-bg); }
+.badge-warn, .badge-skipped, .badge-running { color: var(--warn); background: var(--warn-bg); }
+.badge-fail, .badge-failed, .badge-rejected { color: var(--fail); background: var(--fail-bg); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+.card { border: 1px solid var(--border); border-left-width: 4px; border-radius: 8px; padding: 10px 12px; }
+.card p { margin: 6px 0; }
+.card-pass { border-left-color: var(--pass); } .card-warn { border-left-color: var(--warn); } .card-fail { border-left-color: var(--fail); }
+.table-wrap { overflow-x: auto; max-height: 460px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+th { position: sticky; top: 0; background: var(--panel); font-weight: 600; }
+td.num, th.num { text-align: right; }
+td.raw { white-space: pre; font-family: ui-monospace, Consolas, monospace; font-size: 12px; }
+tr.row-bad td, tr.negative td { background: var(--neg-bg); }
+tr.current td { font-weight: 600; }
+.controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+select, input { font: inherit; padding: 4px 8px; border: 1px solid var(--border); border-radius: 6px;
+                background: var(--panel); color: var(--text); }
+#chart { width: 100%; height: 240px; display: block; }
+#chart .line { fill: none; stroke: var(--accent); stroke-width: 2; }
+#chart .zero { stroke: var(--muted); stroke-dasharray: 4 4; }
+#chart .axis { fill: var(--muted); font-size: 11px; }
+#chart .point { fill: var(--accent); } #chart .point.neg { fill: var(--fail); }
+.pill { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 12px; background: var(--pass-bg); color: var(--pass); }
+details summary { cursor: pointer; color: var(--accent); margin: 4px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Inventory daily balances &middot; reconciliation WARN</h1>
+  <nav><a href="#recon">Reconciliation</a><a href="#runs">Run log</a><a href="#rejects">Rejects</a><a href="#balances">Balance explorer</a><a href="#history">Movement history</a></nav>
+</header>
+<main>
+<section id="summary"><div class="tiles"><div class="tile"><div class="tile-label">Reconciliation</div><div class="tile-value"><span class="badge badge-warn">WARN</span></div></div><div class="tile"><div class="tile-label">Horizon (latest day)</div><div class="tile-value">2026-03-04</div></div><div class="tile"><div class="tile-label">On hand at horizon</div><div class="tile-value"><span id="on-hand">189</span></div></div><div class="tile"><div class="tile-label">Pairs</div><div class="tile-value">7</div></div><div class="tile"><div class="tile-label">Balance rows</div><div class="tile-value">21</div></div><div class="tile"><div class="tile-label">Movement events</div><div class="tile-value">18</div></div><div class="tile"><div class="tile-label">Quarantined rows</div><div class="tile-value"><span id="quarantined">13</span></div></div><div class="tile"><div class="tile-label">Runs</div><div class="tile-value">3</div></div></div><p class="muted">Generated at 2026-11-09T09:38:05Z. Read-only view of the database.</p></section>
+
+<section id="recon"><h2>Reconciliation checks</h2><div class="cards"><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>run_counts</strong><span class="muted"> &middot; failures: 0</span></div><p>Per run: rows_read = accepted + rejected + duplicate, matching movement_event and quarantine_movement counts for that run_id.</p><p class="muted">3 runs checked; rows read by successful runs = 31; rows in tables = 31</p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>independent_recompute</strong><span class="muted"> &middot; failures: 0</span></div><p>Opening balance + SQL window cumulative sum of leg deltas equals closing_qty on every movement date.</p><p class="muted">13 (pair, movement date) points compared</p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>continuity</strong><span class="muted"> &middot; failures: 0</span></div><p>Opening = previous day&#x27;s closing with no date gaps; first opening = opening balance (or 0).</p><p class="muted"></p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>row_arithmetic</strong><span class="muted"> &middot; failures: 0</span></div><p>closing = opening + net_change, and net_change = receipt - issue + transfer_in - transfer_out + adjustment, on every row.</p><p class="muted">21 balance rows checked</p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>component_totals</strong><span class="muted"> &middot; failures: 0</span></div><p>Receipt, issue, transfer-in, transfer-out and adjustment totals in daily_inventory_balance equal the ledger.</p><p class="muted">ledger totals: receipt=63, issue=44, transfer_in=40, transfer_out=40, adjustment=0</p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>transfer_balance</strong><span class="muted"> &middot; failures: 0</span></div><p>Total transfer_in_qty equals total transfer_out_qty.</p><p class="muted">transfer_in=40, transfer_out=40</p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>pair_coverage</strong><span class="muted"> &middot; failures: 0</span></div><p>Every pair runs from its start date (as_of_date + 1, or first movement) to the global horizon; no unexpected pairs.</p><p class="muted">7 pairs; global horizon 2026-03-04</p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>current_version_unique</strong><span class="muted"> &middot; failures: 0</span></div><p>Exactly one current version per movement_id.</p><p class="muted">15 distinct movements</p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>referential_integrity</strong><span class="muted"> &middot; failures: 0</span></div><p>No orphan sku or location values in movement_event, daily_inventory_balance or opening_balance.</p><p class="muted"></p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>quarantine_traceability</strong><span class="muted"> &middot; failures: 0</span></div><p>Every quarantine row has source_file, source_line, raw_record and a reject_reason.</p><p class="muted">13 quarantine rows checked</p></div><div class="card card-pass"><div class="card-title"><span class="badge badge-pass">PASS</span> <strong>closed_period_legs</strong><span class="muted"> &middot; failures: 0</span></div><p>No accepted leg is dated on or before its pair&#x27;s opening as_of_date (can only happen if an opening balance changed after loading).</p><p class="muted"></p></div><div class="card card-warn"><div class="card-title"><span class="badge badge-warn">WARN</span> <strong>negative_balances</strong><span class="muted"> &middot; failures: 2</span></div><p>Closing balances below zero (data-quality warning: stock issued that was never received).</p><p class="muted">2 negative rows across 1 pairs</p><details><summary>Examples</summary><div class="table-wrap"><table><thead><tr><th>sku</th><th>location_id</th><th>balance_date</th><th>closing_qty</th></tr></thead><tbody><tr><td>SKU-003</td><td>WH-01</td><td>2026-03-03</td><td>-7</td></tr><tr><td>SKU-003</td><td>WH-01</td><td>2026-03-04</td><td>-7</td></tr></tbody></table></div></details></div></div></section>
+
+<section id="runs"><h2>Run log (in the order runs were started)</h2><div class="table-wrap"><table><thead><tr><th>run_id</th><th>source_file</th><th>status</th><th>rows_read</th><th>rows_accepted</th><th>rows_rejected</th><th>rows_duplicate</th><th>rows_late</th><th>rows_superseding</th><th>pairs_rebuilt</th><th>balance_rows_written</th><th>duration_ms</th><th>error_message</th></tr></thead><tbody><tr><td>run-20261109T093805Z-3150e8ed</td><td>reference</td><td>SUCCESS</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>3</td><td>0</td><td>52</td><td></td></tr><tr><td>run-20261109T093805Z-ac9a4307</td><td>batch_01.csv</td><td>SUCCESS</td><td>17</td><td>8</td><td>8</td><td>1</td><td>0</td><td>0</td><td>4</td><td>7</td><td>31</td><td></td></tr><tr><td>run-20261109T093805Z-989f419f</td><td>batch_02.csv</td><td>SUCCESS</td><td>14</td><td>10</td><td>4</td><td>0</td><td>4</td><td>2</td><td>7</td><td>18</td><td>30</td><td></td></tr></tbody></table></div></section>
+
+<section id="rejects">
+  <h2>Rejects</h2>
+  <p class="muted">Quarantined rows by reason (DUPLICATE_EVENT rows are dropped duplicates, counted separately from rejects).</p>
+  <div class="table-wrap"><table><thead><tr><th>reject_reason</th><th>rows</th></tr></thead><tbody><tr><td>INVALID_QUANTITY</td><td>2</td></tr><tr><td>BEFORE_OPENING_SNAPSHOT</td><td>1</td></tr><tr><td>CONFLICTING_DUPLICATE</td><td>1</td></tr><tr><td>DUPLICATE_EVENT</td><td>1</td></tr><tr><td>FUTURE_DATED</td><td>1</td></tr><tr><td>INVALID_DATE</td><td>1</td></tr><tr><td>INVALID_MOVEMENT_TYPE</td><td>1</td></tr><tr><td>INVALID_TRANSFER</td><td>1</td></tr><tr><td>MALFORMED_ROW</td><td>1</td></tr><tr><td>MISSING_REQUIRED_FIELD</td><td>1</td></tr><tr><td>UNKNOWN_LOCATION</td><td>1</td></tr><tr><td>UNKNOWN_SKU</td><td>1</td></tr></tbody></table></div>
+  <div class="controls" style="margin-top:12px">
+    <label>Filter <input id="q-filter" type="search" placeholder="file, movement_id, reason or text"></label>
+    <span id="q-count" class="muted"></span>
+  </div>
+  <div class="table-wrap"><table id="q-table"><thead></thead><tbody></tbody></table></div>
+</section>
+
+<section id="balances">
+  <h2>Balance explorer</h2>
+  <div class="controls">
+    <label>SKU <select id="b-sku"></select></label>
+    <label>Location <select id="b-loc"></select></label>
+    <span id="b-note" class="muted"></span>
+  </div>
+  <svg id="chart" viewBox="0 0 800 240" preserveAspectRatio="none" role="img" aria-label="closing quantity over time"></svg>
+  <div class="table-wrap" style="margin-top:10px"><table id="b-table"><thead></thead><tbody></tbody></table></div>
+</section>
+
+<section id="history">
+  <h2>Movement history</h2>
+  <div class="controls">
+    <label>movement_id <input id="m-id" type="search" list="m-examples" placeholder="e.g. MV-1001"></label>
+    <datalist id="m-examples"></datalist>
+    <span id="m-note" class="muted"></span>
+  </div>
+  <div class="table-wrap"><table id="m-table"><thead></thead><tbody></tbody></table></div>
+  <h2 style="margin-top:14px; font-size:15px">Quarantined rows with this movement_id</h2>
+  <div class="table-wrap"><table id="m-qtable"><thead></thead><tbody></tbody></table></div>
+</section>
+</main>
+
+<script type="application/json" id="dashboard-data">{"balanceColumns":["sku","location_id","balance_date","opening_qty","receipt_qty","issue_qty","transfer_in_qty","transfer_out_qty","adjustment_qty","net_change_qty","closing_qty"],"balances":[["SKU-001","ST-01","2026-03-01",20,0,0,0,0,0,0,20],["SKU-001","ST-01","2026-03-02",20,0,8,25,0,-2,15,35],["SKU-001","ST-01","2026-03-03",35,0,0,0,5,0,-5,30],["SKU-001","ST-01","2026-03-04",30,0,0,0,0,0,0,30],["SKU-001","ST-02","2026-03-03",0,0,0,5,0,0,5,5],["SKU-001","ST-02","2026-03-04",5,0,0,0,0,0,0,5],["SKU-001","WH-01","2026-03-01",100,45,19,0,0,0,26,126],["SKU-001","WH-01","2026-03-02",126,0,0,0,25,0,-25,101],["SKU-001","WH-01","2026-03-03",101,0,10,0,0,0,-10,91],["SKU-001","WH-01","2026-03-04",91,0,0,0,0,0,0,91],["SKU-002","ST-02","2026-03-02",0,0,0,10,0,0,10,10],["SKU-002","ST-02","2026-03-03",10,0,0,0,0,-1,-1,9],["SKU-002","ST-02","2026-03-04",9,6,0,0,0,0,6,15],["SKU-002","WH-01","2026-03-01",50,0,0,0,0,0,0,50],["SKU-002","WH-01","2026-03-02",50,0,0,0,10,3,-7,43],["SKU-002","WH-01","2026-03-03",43,0,0,0,0,0,0,43],["SKU-002","WH-01","2026-03-04",43,0,0,0,0,0,0,43],["SKU-003","ST-02","2026-03-03",0,12,0,0,0,0,12,12],["SKU-003","ST-02","2026-03-04",12,0,0,0,0,0,0,12],["SKU-003","WH-01","2026-03-03",0,0,7,0,0,0,-7,-7],["SKU-003","WH-01","2026-03-04",-7,0,0,0,0,0,0,-7]],"movementColumns":["arrival","movement_id","version","movement_type","sku","location_id","to_location_id","quantity","business_date","event_ts","is_late","source_file","source_line","is_current"],"movements":[[1,"MV-1001",1,"RECEIPT","SKU-001","WH-01",null,40,"2026-03-01","2026-03-01T08:00:00Z",0,"batch_01.csv",2,0],[13,"MV-1001",2,"RECEIPT","SKU-001","WH-01",null,45,"2026-03-01","2026-03-03T10:00:00Z",1,"batch_02.csv",6,1],[2,"MV-1002",1,"ISSUE","SKU-001","WH-01",null,15,"2026-03-01","2026-03-01T11:30:00Z",0,"batch_01.csv",3,1],[3,"MV-1003",1,"TRANSFER","SKU-001","WH-01","ST-01",25,"2026-03-02","2026-03-02T07:15:00Z",0,"batch_01.csv",4,1],[4,"MV-1004",1,"ADJUSTMENT","SKU-001","ST-01",null,-2,"2026-03-02","2026-03-02T18:00:00Z",0,"batch_01.csv",5,1],[5,"MV-1005",1,"RECEIPT","SKU-002","WH-01",null,30,"2026-03-01","2026-03-01T09:00:00Z",0,"batch_01.csv",6,0],[15,"MV-1005",2,"RECEIPT","SKU-002","WH-01",null,28,"2026-03-01","2026-03-03T10:30:00Z",1,"batch_02.csv",8,0],[14,"MV-1005",3,"RECEIPT","SKU-002","WH-01",null,0,"2026-03-01","2026-03-03T11:00:00Z",1,"batch_02.csv",7,1],[6,"MV-1006",1,"ISSUE","SKU-001","ST-01",null,8,"2026-03-02","2026-03-02T16:20:00Z",0,"batch_01.csv",7,1],[7,"MV-1007",1,"TRANSFER","SKU-002","WH-01","ST-02",10,"2026-03-02","2026-03-02T07:30:00Z",0,"batch_01.csv",8,1],[8,"MV-1008",1,"ADJUSTMENT","SKU-002","WH-01",null,3,"2026-03-02","2026-03-02T17:45:00Z",0,"batch_01.csv",9,1],[9,"MV-2001",1,"RECEIPT","SKU-003","ST-02",null,12,"2026-03-03","2026-03-03T08:00:00Z",0,"batch_02.csv",2,1],[10,"MV-2002",1,"ISSUE","SKU-001","WH-01",null,10,"2026-03-03","2026-03-03T12:00:00Z",0,"batch_02.csv",3,1],[11,"MV-2003",1,"TRANSFER","SKU-001","ST-01","ST-02",5,"2026-03-03","2026-03-03T09:00:00Z",0,"batch_02.csv",4,1],[12,"MV-2004",1,"ISSUE","SKU-001","WH-01",null,4,"2026-03-01","2026-03-03T09:30:00Z",1,"batch_02.csv",5,1],[16,"MV-2005",1,"ISSUE","SKU-003","WH-01",null,7,"2026-03-03","2026-03-03T13:00:00Z",0,"batch_02.csv",9,1],[17,"MV-2009",1,"ADJUSTMENT","SKU-002","ST-02",null,-1,"2026-03-03","2026-03-03T19:00:00Z",0,"batch_02.csv",14,1],[18,"MV-2010",1,"RECEIPT","SKU-002","ST-02",null,6,"2026-03-04","2026-03-03T20:00:00Z",0,"batch_02.csv",15,1]],"quarantineColumns":["source_file","source_line","movement_id","reject_reason","raw_record","reject_details"],"quarantine":[["batch_01.csv",10,"MV-1002","DUPLICATE_EVENT","MV-1002,1,ISSUE,SKU-001,WH-01,,15,2026-03-01,2026-03-01T11:30:00Z,SO-7001,ERP","[{\"code\": \"DUPLICATE_EVENT\", \"message\": \"identical copy of (MV-1002, v1), first loaded by run run-20261109T093805Z-ac9a4307 from batch_01.csv line 3\"}]"],["batch_01.csv",11,"MV-1101","INVALID_QUANTITY","MV-1101,1,RECEIPT,SKU-002,WH-01,,ten,2026-03-02,2026-03-02T10:00:00Z,PO-5003,ERP","[{\"code\": \"INVALID_QUANTITY\", \"message\": \"quantity must be a whole number, got 'ten'\"}]"],["batch_01.csv",12,"MV-1102","MISSING_REQUIRED_FIELD","MV-1102,1,ISSUE,,WH-01,,4,2026-03-02,2026-03-02T10:05:00Z,SO-7002,ERP","[{\"code\": \"MISSING_REQUIRED_FIELD\", \"message\": \"blank required fields: sku\"}]"],["batch_01.csv",13,"MV-1103","UNKNOWN_SKU","MV-1103,1,RECEIPT,SKU-999,WH-01,,6,2026-03-02,2026-03-02T10:10:00Z,PO-5004,ERP","[{\"code\": \"UNKNOWN_SKU\", \"message\": \"sku 'SKU-999' not in dim_sku\"}]"],["batch_01.csv",14,"MV-1104","MALFORMED_ROW","MV-1104,1,RECEIPT,SKU-001,WH-01,,6,2026-03-02,2026-03-02T10:15:00Z,PO-5005,ERP,EXTRA","[{\"code\": \"MALFORMED_ROW\", \"message\": \"expected 11 fields, got 12\"}]"],["batch_01.csv",15,"MV-1105","INVALID_TRANSFER","MV-1105,1,TRANSFER,SKU-001,WH-01,WH-01,3,2026-03-02,2026-03-02T10:20:00Z,REPLENISH,WMS","[{\"code\": \"INVALID_TRANSFER\", \"message\": \"TRANSFER to the same location 'WH-01'\"}]"],["batch_01.csv",16,"MV-1106","INVALID_MOVEMENT_TYPE","MV-1106,1,RETURN,SKU-001,ST-01,,3,2026-03-02,2026-03-02T10:25:00Z,CUSTOMER_RETURN,POS","[{\"code\": \"INVALID_MOVEMENT_TYPE\", \"message\": \"unknown movement_type 'RETURN'\"}]"],["batch_01.csv",17,"MV-1107","BEFORE_OPENING_SNAPSHOT","MV-1107,1,RECEIPT,SKU-001,WH-01,,9,2026-02-28,2026-03-01T06:00:00Z,PO-4999,ERP","[{\"code\": \"BEFORE_OPENING_SNAPSHOT\", \"message\": \"business_date 2026-02-28 is in a closed period for SKU-001@WH-01 (as_of_date 2026-02-28)\"}]"],["batch_01.csv",18,"MV-1108","FUTURE_DATED","MV-1108,1,RECEIPT,SKU-003,ST-01,,5,2026-03-05,2026-03-02T10:30:00Z,PO-5006,ERP","[{\"code\": \"FUTURE_DATED\", \"message\": \"business_date 2026-03-05 is after event_ts local date 2026-03-02\"}]"],["batch_02.csv",10,"MV-2006","UNKNOWN_LOCATION","MV-2006,1,RECEIPT,SKU-002,WH-99,,5,2026-03-03,2026-03-03T13:30:00Z,PO-5011,ERP","[{\"code\": \"UNKNOWN_LOCATION\", \"message\": \"location not in dim_location: WH-99\"}]"],["batch_02.csv",11,"MV-1006","CONFLICTING_DUPLICATE","MV-1006,1,ISSUE,SKU-001,ST-01,,9,2026-03-02,2026-03-03T14:00:00Z,SALE,POS","[{\"code\": \"CONFLICTING_DUPLICATE\", \"message\": \"different payload for (MV-1006, v1), first loaded by run run-20261109T093805Z-ac9a4307 from batch_01.csv line 7\"}]"],["batch_02.csv",12,"MV-2007","INVALID_QUANTITY","MV-2007,1,RECEIPT,SKU-002,ST-01,,0,2026-03-03,2026-03-03T14:30:00Z,PO-5012,ERP","[{\"code\": \"INVALID_QUANTITY\", \"message\": \"quantity 0 is only allowed as a void (version \u003e 1)\"}]"],["batch_02.csv",13,"MV-2008","INVALID_DATE","MV-2008,1,RECEIPT,SKU-002,ST-01,,4,2026-02-30,2026-03-03T15:00:00Z,PO-5013,ERP","[{\"code\": \"INVALID_DATE\", \"message\": \"business_date must be a real YYYY-MM-DD date, got '2026-02-30'\"}]"]]}</script>
+<script>
+"use strict";
+// All data comes from the JSON block above. It is only ever written with textContent.
+var DATA = JSON.parse(document.getElementById("dashboard-data").textContent);
+var NUMERIC = { opening_qty: 1, receipt_qty: 1, issue_qty: 1, transfer_in_qty: 1, transfer_out_qty: 1,
+                adjustment_qty: 1, net_change_qty: 1, closing_qty: 1, quantity: 1, version: 1, source_line: 1, arrival: 1 };
+
+function el(tag, text, className) {
+  var node = document.createElement(tag);
+  if (text !== undefined && text !== null) { node.textContent = String(text); }
+  if (className) { node.className = className; }
+  return node;
+}
+
+function fillTable(table, columns, rows, rowClass) {
+  var head = table.querySelector("thead"), body = table.querySelector("tbody");
+  head.textContent = ""; body.textContent = "";
+  var tr = el("tr");
+  columns.forEach(function (c) { tr.appendChild(el("th", c, NUMERIC[c] ? "num" : "")); });
+  head.appendChild(tr);
+  if (rows.length === 0) {
+    var empty = el("tr"), td = el("td", "none", "muted");
+    td.colSpan = columns.length; empty.appendChild(td); body.appendChild(empty); return;
+  }
+  rows.forEach(function (row) {
+    var r = el("tr", null, rowClass ? rowClass(row) : "");
+    row.forEach(function (cell, i) {
+      var name = columns[i];
+      r.appendChild(el("td", cell === null ? "" : cell, NUMERIC[name] ? "num" : (name === "raw_record" ? "raw" : "")));
+    });
+    body.appendChild(r);
+  });
+}
+
+// ---- Rejects: filterable quarantine table ----
+(function () {
+  var cols = DATA.quarantineColumns, shown = cols.slice(0, 5), input = document.getElementById("q-filter");
+  var LIMIT = 500;
+  function render() {
+    var term = input.value.trim().toLowerCase();
+    var rows = DATA.quarantine.filter(function (row) {
+      return term === "" || row.join(" ").toLowerCase().indexOf(term) !== -1;
+    });
+    fillTable(document.getElementById("q-table"), shown, rows.slice(0, LIMIT).map(function (r) { return r.slice(0, 5); }));
+    document.getElementById("q-count").textContent = rows.length + " of " + DATA.quarantine.length + " rows" +
+      (rows.length > LIMIT ? " (first " + LIMIT + " shown)" : "");
+  }
+  input.addEventListener("input", render);
+  render();
+})();
+
+// ---- Balance explorer ----
+(function () {
+  var cols = DATA.balanceColumns, byPair = {}, skus = [];
+  DATA.balances.forEach(function (row) {
+    var key = row[0] + "\u0000" + row[1];
+    if (!byPair[key]) { byPair[key] = []; if (skus.indexOf(row[0]) === -1) { skus.push(row[0]); } }
+    byPair[key].push(row);
+  });
+  var skuSel = document.getElementById("b-sku"), locSel = document.getElementById("b-loc");
+  var chart = document.getElementById("chart");
+  var SVG_NS = chart.namespaceURI;   // taken from the page, so no namespace URL is written in this file
+
+  function option(select, value) { var o = el("option", value); o.value = value; select.appendChild(o); }
+  function locationsFor(sku) {
+    return Object.keys(byPair).filter(function (k) { return k.split("\u0000")[0] === sku; })
+                              .map(function (k) { return k.split("\u0000")[1]; });
+  }
+  function svg(tag, attrs, text) {
+    var node = document.createElementNS(SVG_NS, tag);
+    Object.keys(attrs).forEach(function (a) { node.setAttribute(a, attrs[a]); });
+    if (text !== undefined) { node.textContent = String(text); }
+    chart.appendChild(node);
+    return node;
+  }
+  function drawChart(rows) {
+    chart.textContent = "";
+    if (rows.length === 0) { return; }
+    var W = 800, H = 240, L = 50, R = 10, T = 12, B = 26;
+    var values = rows.map(function (r) { return r[10]; });
+    var lo = Math.min(0, Math.min.apply(null, values)), hi = Math.max(0, Math.max.apply(null, values));
+    if (hi === lo) { hi = lo + 1; }
+    function x(i) { return rows.length === 1 ? (L + W - R) / 2 : L + i * (W - L - R) / (rows.length - 1); }
+    function y(v) { return T + (hi - v) * (H - T - B) / (hi - lo); }
+    svg("line", { x1: L, x2: W - R, y1: y(0), y2: y(0), "class": "zero" });
+    svg("polyline", { points: values.map(function (v, i) { return x(i) + "," + y(v); }).join(" "), "class": "line" });
+    values.forEach(function (v, i) {
+      var p = svg("circle", { cx: x(i), cy: y(v), r: 3.5, "class": v < 0 ? "point neg" : "point" });
+      var title = document.createElementNS(SVG_NS, "title"); title.textContent = rows[i][2] + ": " + v; p.appendChild(title);
+    });
+    svg("text", { x: 4, y: y(hi) + 4, "class": "axis" }, hi);
+    svg("text", { x: 4, y: y(lo) + 4, "class": "axis" }, lo);
+    if (lo < 0 && hi > 0) { svg("text", { x: 4, y: y(0) + 4, "class": "axis" }, 0); }
+    svg("text", { x: L, y: H - 6, "class": "axis" }, rows[0][2]);
+    svg("text", { x: W - R - 70, y: H - 6, "class": "axis" }, rows[rows.length - 1][2]);
+  }
+  function render() {
+    var rows = byPair[skuSel.value + "\u0000" + locSel.value] || [];
+    drawChart(rows);
+    fillTable(document.getElementById("b-table"), cols.slice(2), rows.map(function (r) { return r.slice(2); }),
+              function (r) { return r[r.length - 1] < 0 ? "negative" : ""; });
+    var negatives = rows.filter(function (r) { return r[10] < 0; }).length;
+    document.getElementById("b-note").textContent = rows.length + " days" + (negatives ? ", " + negatives + " negative (highlighted)" : "");
+  }
+  function fillLocations() {
+    locSel.textContent = "";
+    var locations = locationsFor(skuSel.value);
+    locations.forEach(function (l) { option(locSel, l); });
+    if (locations.length) { locSel.value = locations[0]; }
+    render();
+  }
+  skus.forEach(function (s) { option(skuSel, s); });
+  if (skus.length) { skuSel.value = skus[0]; }
+  skuSel.addEventListener("change", fillLocations);
+  locSel.addEventListener("change", render);
+  if (skus.length) { fillLocations(); } else { document.getElementById("b-note").textContent = "no balances yet"; }
+})();
+
+// ---- Movement history ----
+(function () {
+  var cols = DATA.movementColumns, byId = {}, input = document.getElementById("m-id");
+  DATA.movements.forEach(function (row) { (byId[row[1]] = byId[row[1]] || []).push(row); });
+  // Suggest movements that have more than one version (corrections), up to 50.
+  var list = document.getElementById("m-examples"), suggested = 0;
+  Object.keys(byId).forEach(function (id) {
+    if (byId[id].length > 1 && suggested < 50) { var o = el("option"); o.value = id; list.appendChild(o); suggested++; }
+  });
+  function render() {
+    var id = input.value.trim();
+    var rows = (byId[id] || []).slice().sort(function (a, b) { return a[2] - b[2]; });
+    var display = rows.map(function (r) {
+      var copy = r.slice(); copy[10] = r[10] ? "late" : ""; copy[13] = r[13] ? "CURRENT" : "history"; return copy;
+    });
+    fillTable(document.getElementById("m-table"), cols, display, function (r) { return r[13] === "CURRENT" ? "current" : ""; });
+    var outOfOrder = rows.some(function (r, i) { return i > 0 && r[0] < rows[i - 1][0]; });
+    document.getElementById("m-note").textContent = id === "" ? (suggested ? "pick a corrected movement from the list, or type any id" : "type a movement_id") :
+      rows.length + " version(s)" + (outOfOrder ? "; versions arrived out of order (see 'arrival')" : "");
+    var q = DATA.quarantine.filter(function (r) { return r[2] === id; }).map(function (r) { return r.slice(0, 5); });
+    fillTable(document.getElementById("m-qtable"), DATA.quarantineColumns.slice(0, 5), q);
+  }
+  input.addEventListener("input", render);
+  var first = Object.keys(byId).filter(function (id) { return byId[id].length > 1; })[0];
+  if (first) { input.value = first; }
+  render();
+})();
+</script>
+</body>
+</html>
